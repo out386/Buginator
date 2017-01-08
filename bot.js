@@ -5,7 +5,7 @@ var bot;
 
 var google = require('google')
 
-google.resultsPerPage = 1
+google.resultsPerPage = 3
 
 if(process.env.NODE_ENV === 'production') {
   bot = new Bot(token);
@@ -17,7 +17,7 @@ else {
 
 console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
 
-bot.onText(/^/, function (msg) {
+bot.onText(/\/google (.+)/, function (msg) {
   var name = msg.from.first_name;
   var message = msg.text;
 
@@ -31,7 +31,25 @@ bot.onText(/^/, function (msg) {
       if (res.next) res.next()
     } else
     bot.sendMessage(msg.chat.id, title + "\n\n" + url);
-})
-  });
+  })
+});
 
-module.exports = bot;
+bot.on('inline_query', function(msg) {
+  var name = msg.from.first_name; module.exports = bot;
+  var message = msg.query;
+  var user = msg.from.id;
+  if (message) {
+//    console.log(message);
+    google(message, function (err, res){
+      if (err) console.error(err)
+      var link = res.links[0];
+      console.log(link);
+      var title = link.title;
+      var url = link.href;
+      if (url == null) {
+        if (res.next) res.next()
+      } else
+      bot.sendMessage(msg.from.id, title + "\n\n" + url);
+    })
+  }
+});
