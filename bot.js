@@ -38,7 +38,8 @@ bot.on('inline_query', function(msg) {
   var name = msg.from.first_name;
   var message = msg.query;
   var user = msg.from.id;
-  if (message) {
+  if (message && /ggl (.+)/.test(message) ) {
+    message = message.replace(/ggl /, '');
     console.log(message);
     google(message, function (err, res){
       if (err) console.error(err)
@@ -52,7 +53,7 @@ bot.on('inline_query', function(msg) {
         if (url != null) {
         var spliturl = url.split('/');
           var baseurl = spliturl[0] +"//" + spliturl[2] + "/favicon.ico";
-console.log(baseurl);
+
           var result = {"type": "article",
                         "id" : i+'',
                         "title" : title,
@@ -64,7 +65,6 @@ console.log(baseurl);
         }
       }
       bot.answerInlineQuery(msg.id, results);
-      // bot.sendMessage(msg.from.id, title + "\n\n" + url);
     })
   }
 });
