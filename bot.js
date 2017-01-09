@@ -5,8 +5,6 @@ var bot;
 
 var google = require('google')
 
- var results = [];
-
 google.resultsPerPage = 10
 
 if(process.env.NODE_ENV === 'production') {
@@ -40,6 +38,7 @@ bot.on('inline_query', function(msg) {
   var name = msg.from.first_name;
   var message = msg.query;
   var user = msg.from.id;
+  var reses = [];
   console.log("Got message! " + message + " from " + msg.id);
 
   if (message) {
@@ -49,7 +48,7 @@ bot.on('inline_query', function(msg) {
 //      console.log(message);
       google(message, function (err, res){
         if (err) console.error(err)
-
+        var results = [];
         for (var i = 0; i < res.links.length; ++i) {
           var link = res.links[i];
           //console.log(link);
@@ -67,6 +66,7 @@ bot.on('inline_query', function(msg) {
                           "hide_url" : true,
                           "description" : link.description};
             results.push(result);
+            bot.answerInlineQuery(msg.id, results);
           }
         }
       })
@@ -74,7 +74,6 @@ bot.on('inline_query', function(msg) {
     }
   }
 //  console.log("here "+msg.id+" results are :"+results);
-  bot.answerInlineQuery(msg.id, results);
 });
 
 module.exports = bot;
