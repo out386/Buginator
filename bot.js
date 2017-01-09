@@ -5,7 +5,7 @@ var bot;
 
 var google = require('google')
 
-google.resultsPerPage = 3
+google.resultsPerPage = 10
 
 if(process.env.NODE_ENV === 'production') {
   bot = new Bot(token);
