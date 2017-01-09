@@ -39,17 +39,32 @@ bot.on('inline_query', function(msg) {
   var message = msg.query;
   var user = msg.from.id;
   if (message) {
-//    console.log(message);
+    console.log(message);
     google(message, function (err, res){
       if (err) console.error(err)
-      var link = res.links[0];
-      console.log(link);
-      var title = link.title;
-      var url = link.href;
-      if (url == null) {
-        if (res.next) res.next()
-      } else
-      bot.sendMessage(msg.from.id, title + "\n\n" + url);
+      var results = [];
+
+      for (var i = 0; i < res.links.length; ++i) {
+        var link = res.links[i];
+        //console.log(link);
+        var title = link.title;
+        var url = link.href;
+        if (url != null) {
+        var spliturl = url.split('/');
+          var baseurl = spliturl[0] +"//" + spliturl[2] + "/favicon.ico";
+console.log(baseurl);
+          var result = {"type": "article",
+                        "id" : i+'',
+                        "title" : title,
+                        "input_message_content" : {"message_text" : url},
+                        "thumb_url" : baseurl,
+                        "hide_url" : true,
+                        "description" : link.description};
+         results.push(result);
+        }
+      }
+      bot.answerInlineQuery(msg.id, results);
+      // bot.sendMessage(msg.from.id, title + "\n\n" + url);
     })
   }
 });
