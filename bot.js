@@ -72,16 +72,27 @@ bot.on('inline_query', function(msg) {
       })
 //            console.log(results);
     }
+    else {
+      var results = [];
+      var result = {"type": "article",
+         "id" : "oops",
+         "title" : "Invalid query",
+         "input_message_content" : {"message_text" : "Invalid query."},
+         "hide_url" : true,
+         "description" : "Invalid command! Check the list of available commands."};
+     results.push(result);
+     bot.answerInlineQuery(msg.id, results);
+    }
   }
   else {
     var results = [];
     var result = {"type": "article",
      "id" : "Google",
-       "title" : "Google",
-       "input_message_content" : {"message_text" : "Type @BigBug_bot g (query) to search with Google"},
-       "thumb_url" : "https://google.com/favicon.ico",
-       "hide_url" : true,
-       "description" : "Search for anything with Google Search"};
+     "title" : "Google",
+     "input_message_content" : {"message_text" : "Type @BigBug_bot g (query) to search with Google"},
+     "thumb_url" : "https://google.com/favicon.ico",
+     "hide_url" : true,
+     "description" : "Search for anything with Google Search"};
      results.push(result);
      bot.answerInlineQuery(msg.id, results);
   }
