@@ -35,7 +35,7 @@ bot.onText(/\/google (.+)/, function (msg) {
 });
 
 bot.on('inline_query', function(msg) {
-  var name = msg.from.first_name; module.exports = bot;
+  var name = msg.from.first_name;
   var message = msg.query;
   var user = msg.from.id;
   if (message) {
@@ -68,3 +68,5 @@ console.log(baseurl);
     })
   }
 });
+
+module.exports = bot;
