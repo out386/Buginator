@@ -39,12 +39,12 @@ bot.on('inline_query', function(msg) {
   var message = msg.query;
   var user = msg.from.id;
   var reses = [];
-  console.log("Got message! " + message + " from " + msg.id);
+//  console.log("Got message! " + message + " from " + msg.id);
 
   if (message) {
 
-    if(/ggl (.+)/.test(message)) {
-      message = message.replace(/ggl /, '');
+    if(/g (.+)/.test(message)) {
+      message = message.replace(/g /, '');
 //      console.log(message);
       google(message, function (err, res){
         if (err) console.error(err)
@@ -72,6 +72,18 @@ bot.on('inline_query', function(msg) {
       })
 //            console.log(results);
     }
+  }
+  else {
+    var results = [];
+    var result = {"type": "article",
+     "id" : "Google",
+       "title" : "Google",
+       "input_message_content" : {"message_text" : "Type @BigBug_bot g (query) to search with Google"},
+       "thumb_url" : "https://google.com/favicon.ico",
+       "hide_url" : true,
+       "description" : "Search for anything with Google Search"};
+     results.push(result);
+     bot.answerInlineQuery(msg.id, results);
   }
 //  console.log("here "+msg.id+" results are :"+results);
 });
