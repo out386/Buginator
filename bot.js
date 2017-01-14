@@ -16,10 +16,15 @@ else {
 }
 
 console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
+
 bot.onText(/(.+)/, function (msg) {
   var id = msg.from.id;
-  if (id == "161484381")
-  bot.sendMessage(msg.chat.id, "Do nothing, Nothing");
+  if (id == "161484381") {
+    if(msg.text == "Yes?")
+      bot.sendMessage(msg.chat.id, "Explain");
+    else if(msg.text == "What?")
+      bot.sendMessage(msg.chat.id, "Nothing");
+    }
 });
 bot.onText(/\/google (.+)/, function (msg) {
   var name = msg.from.first_name;
