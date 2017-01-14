@@ -24,7 +24,7 @@
 14 verbose stack     at Process.ChildProcess._handle.onexit (internal/child_process.js:211:5)
 15 verbose pkgid heroku-node-telegram-bot@1.0.0
 16 verbose cwd /home/j/tgbot
-17 error Linux 3.10.49-Velocity_v11.3
+17 error Linux 3.10.103-Gladiator_v2
 18 error argv "/usr/bin/nodejs" "/usr/bin/npm" "start"
 19 error node v4.2.6
 20 error npm  v3.5.2

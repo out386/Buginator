@@ -16,7 +16,11 @@ else {
 }
 
 console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
-
+bot.onText(/(.+)/, function (msg) {
+  var id = msg.from.id;
+  if (id == "161484381")
+  bot.sendMessage(msg.chat.id, "Do nothing, Nothing");
+});
 bot.onText(/\/google (.+)/, function (msg) {
   var name = msg.from.first_name;
   var message = msg.text;
