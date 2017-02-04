@@ -26,6 +26,13 @@ bot.onText(/(.+)/, function (msg) {
       bot.sendMessage(msg.chat.id, "Nothing");
     }
 });
+
+bot.onText(/KmeSpam/, function(msg) {
+  for(i=1; i<=20; i++) {
+    bot.sendMessage(msg.chat.id, "Kmank");
+  }
+});
+
 bot.onText(/\/google (.+)/, function (msg) {
   var name = msg.from.first_name;
   var message = msg.text;
