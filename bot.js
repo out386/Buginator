@@ -2,7 +2,6 @@ var token = process.env.TOKEN;
 
 var Bot = require('node-telegram-bot-api');
 var bot;
-
 var google = require('google')
 
 google.resultsPerPage = 10
@@ -28,7 +27,7 @@ bot.onText(/(.+)/, function (msg) {
 });
 
 bot.onText(/KmeSpam/, function(msg) {
-  for(i=1; i<=20; i++) {
+  for(i=1; i<=1; i++) {
     bot.sendMessage(msg.chat.id, "Kmank");
   }
 });
