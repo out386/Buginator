@@ -123,21 +123,21 @@ bot.on('inline_query', function(msg) {
   else {
     var results = [];
     var result = {"type": "article",
-     "id" : "Google",
+     "id" : "Googlen",
      "title" : "Google",
      "input_message_content" : {"message_text" : "Type @BigBug_bot g (query) to search with Google"},
      "thumb_url" : "https://google.com/favicon.ico",
      "hide_url" : true,
-     "description" : "Search for anything with Google Search"};
+     "description" : "Search for anything with Google Search\nTap \"g\" (without quotes) now to use."};
      results.push(result);
 
-    var result2 = {"type": "article",
-     "id" : "Translate",
+    result = {"type": "article",
+     "id" : "Translaten",
      "title" : "Translate to english",
      "input_message_content" : {"message_text" : "Type @BigBug_bot t (text) to translate to english"},
      "hide_url" : true,
-     "description" : "Translate anything with Google Translate"};
-     results.push(result2);
+     "description" : "Translate anything with Google Translate\nTap \"t\" (without quotes) now to use."};
+     results.push(result);
      bot.answerInlineQuery(msg.id, results);
   }
 //  console.log("here "+msg.id+" results are :"+results);
