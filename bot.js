@@ -3,6 +3,7 @@ var token = process.env.TOKEN;
 var Bot = require('node-telegram-bot-api');
 var bot;
 var google = require('google')
+const translate = require('google-translate-api');
 
 google.resultsPerPage = 10
 
@@ -91,6 +92,22 @@ bot.on('inline_query', function(msg) {
       })
 //            console.log(results);
     }
+
+    else if(/t (.+)/.test(message)) {
+      message = message.replace(/t /, '');
+      translate(message, {to: 'en'}).then(res => {
+        var result = {"type": "article",
+                      "id": "1",
+                      "title": "Translated to English",
+                      "input_message_content": {"message_text": res.text},
+                      "description": res.text};
+        var results = [];
+        results.push(result);
+        bot.answerInlineQuery(msg.id, results);
+      }).catch(err => {
+          console.error(err);
+      });
+   }
     else {
       var results = [];
       var result = {"type": "article",
@@ -113,6 +130,14 @@ bot.on('inline_query', function(msg) {
      "hide_url" : true,
      "description" : "Search for anything with Google Search"};
      results.push(result);
+
+    var result2 = {"type": "article",
+     "id" : "Translate",
+     "title" : "Translate to english",
+     "input_message_content" : {"message_text" : "Type @BigBug_bot t (text) to translate to english"},
+     "hide_url" : true,
+     "description" : "Translate anything with Google Translate"};
+     results.push(result2);
      bot.answerInlineQuery(msg.id, results);
   }
 //  console.log("here "+msg.id+" results are :"+results);
