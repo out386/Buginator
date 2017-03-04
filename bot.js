@@ -81,7 +81,7 @@ bot.on('inline_query', function(msg) {
             var result = {"type": "article",
                           "id" : i+'',
                           "title" : title,
-                          "input_message_content" : {"message_text" : url},
+                          "input_message_content" : {"message_text" : "<code>Google: Result for</code>   <b>\"" + message + "\" :</b>\n\n" + url, "parse_mode" : "HTML"},
                           "thumb_url" : baseurl,
                           "hide_url" : true,
                           "description" : link.description};
