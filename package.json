@@ -12,6 +12,7 @@
   "author": "Volodymyr Lut",
   "license": "ISC",
   "dependencies": {
+    "alasql": "^0.3.9",
     "body-parser": "^1.15.0",
     "express": "^4.13.4",
     "google": "^2.1.0",

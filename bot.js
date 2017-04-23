@@ -4,6 +4,10 @@ var Bot = require('node-telegram-bot-api');
 var bot;
 var google = require('google')
 const translate = require('google-translate-api');
+var alasql = require('alasql');
+var db = new alasql.Database();
+
+db.exec('CREATE TABLE tags (tag STRING, message STRING)');
 
 google.resultsPerPage = 10
 
@@ -39,6 +43,28 @@ bot.onText(/KmeStop/, function(msg) {
 
 bot.onText(/\/pizzaplz/, function(msg) {
   bot.sendMessage(msg.chat.id, "Go make your own pizza");
+});
+
+bot.onText(/\/save (.+)/, function(msg) {
+  var text = msg.text;
+//  console.log("sqlmessageText:"+text);
+  var tagStartIndex = text.indexOf("#");
+  var tagEndIndex = text.indexOf(" ", tagStartIndex);
+  var tagg = text.slice(tagStartIndex + 1, tagEndIndex);
+  console.log("tag text:"+tagg+"$");
+  var messagee = text.slice(tagEndIndex+1);
+  console.log("message:"+messagee+"$");
+
+  db.exec('INSERT INTO tags (?,?)', [tagg, messagee]);
+});
+
+bot.onText(/\/gshow (.+)/, function(msg) {
+  var tag = msg.text.slice(msg.text.indexOf("#") + 1);
+  console.log(tag);
+  var result = db.exec('SELECT message FROM tags  WHERE tag=?', [tag]);
+  console.log(result[0].message);
+//  console.log(db.exec('Select * FROM tags'));
+  bot.sendMessage(msg.chat.id, result[0].message);
 });
 
 bot.onText(/\/google (.+)/, function (msg) {
