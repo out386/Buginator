@@ -32,9 +32,9 @@ bot.onText(/(.+)/, function (msg) {
 });
 
 bot.onText(/KmeSpam/, function(msg) {
-  for(i=1; i<=1; i++) {
-    bot.sendMessage(msg.chat.id, "Kmank");
-  }
+//  for(i=1; i<=1; i++) {
+//    bot.sendMessage(msg.chat.id, "Kmank");
+//  }
 });
 
 bot.onText(/KmeStop/, function(msg) {
