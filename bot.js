@@ -37,6 +37,10 @@ bot.onText(/KmeStop/, function(msg) {
   bot.sendMessage(msg.chat.id, "Not gonna happen, man.");
 });
 
+bot.onText(/\/pizzaplz/, function(msg) {
+  bot.sendMessage(msg.chat.id, "Go make your own pizza");
+});
+
 bot.onText(/\/google (.+)/, function (msg) {
   var name = msg.from.first_name;
   var message = msg.text;
