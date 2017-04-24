@@ -7,7 +7,7 @@ const translate = require('google-translate-api');
 var alasql = require('alasql');
 var db = new alasql.Database();
 
-db.exec('CREATE TABLE tags (tag STRING, message STRING)');
+db.exec('CREATE TABLE tags (id STRING, tag STRING, message STRING, UNIQUE KEY uk (id, tag))');
 
 google.resultsPerPage = 10
 
@@ -47,25 +47,22 @@ bot.onText(/\/pizzaplz/, function(msg) {
 
 bot.onText(/\/save (.+)/, function(msg) {
   var text = msg.text;
-//  console.log("sqlmessageText:"+text);
   var tagStartIndex = text.indexOf("#");
   var tagEndIndex = text.indexOf(" ", tagStartIndex);
-  var tagg = text.slice(tagStartIndex + 1, tagEndIndex);
-  console.log("tag text:"+tagg+"$");
-  var messagee = text.slice(tagEndIndex+1);
-  console.log("message:"+messagee+"$");
+  var tag = text.slice(tagStartIndex + 1, tagEndIndex);
+  var message = text.slice(tagEndIndex+1);
+  console.log(msg.chat.id + ": #" + tag + " = " + message + "\n");
 
-  db.exec('INSERT INTO tags (?,?)', [tagg, messagee]);
+  db.exec('REPLACE INTO tags (?,?,?)', [msg.chat.id, tag, message]);
 });
 
 bot.onText(/^#([a-zA-Z0-9_\-]+)$/, function(msg) {
   console.log("tag retrieval: " + msg.text);
   var tag = msg.text.slice(msg.text.indexOf("#") + 1);
   if (tag) {
-    console.log("#" + tag);
-    var result = db.exec('SELECT message FROM tags  WHERE tag=?', [tag]);
+    var result = db.exec('SELECT message FROM tags  WHERE id=? AND tag=?', [msg.chat.id, tag]);
     if (result && result[0] && result[0].message) {
-      console.log(result[0].message);
+      console.log(result[0].message + "\n");
       bot.sendMessage(msg.chat.id, result[0].message);
     }
   }
