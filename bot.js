@@ -4,9 +4,7 @@ var Bot = require('node-telegram-bot-api');
 var bot;
 var google = require('google')
 const translate = require('google-translate-api');
-var pg = require('pg');
-
-//db.exec('CREATE TABLE tags (id STRING, tag STRING, message STRING, UNIQUE KEY uk (id, tag))');
+const pool = require('./db');
 
 google.resultsPerPage = 10
 
@@ -67,10 +65,8 @@ bot.onText(/\/save (.+)/, function(msg) {
       + tag + "', message='"
       + message + "'";
     console.log(query);
-    pg.connect(process.env.DATABASE_URL, function(err, client, done) {
-      client.query(query, function(err, result) {
-        done();
-      });
+
+    pool.query(query, function(err, result) {
     });
   }
 });
@@ -83,37 +79,31 @@ bot.onText(/^#([a-zA-Z0-9_\-]+)$/, function(msg) {
         + msg.chat.id + "' AND tag='"
         + tag + "'";
     console.log(query);
-    pg.connect(process.env.DATABASE_URL, function(err, client, done) {
-      client.query(query, function(err, result) {
-        done();
-        if (result && result.rows && result.rows[0] && result.rows[0].message) {
-          console.log(result.rows[0].message + "\n");
-          bot.sendMessage(msg.chat.id, result.rows[0].message);
-        }
-      });
+    pool.query(query, function(err, result) {
+      if (result && result.rows && result.rows[0] && result.rows[0].message) {
+        console.log(result.rows[0].message + "\n");
+        bot.sendMessage(msg.chat.id, result.rows[0].message);
+      }
     });
   }
 });
 
 bot.onText(/^alltags/i, function(msg) {
   var query = "SELECT tag FROM tags WHERE id='" + msg.chat.id + "'";
-  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
-      client.query(query, function(err, result) {
-        done();
-        if (result) {
-        console.log("Saved tags : {");
-        var items = "Send tag to see the associated message\nTags for this group:\n";
-        var item;
-        result.rows.forEach(function(item) {
-          console.log(item.tag);
-          items = items + "#" + item.tag + "\n";
-        });
-        if (items) {
-          bot.sendMessage(msg.chat.id, items);
-          console.log("}\n");
-        }
+  pool.query(query, function(err, result) {
+    if (result) {
+      console.log("Saved tags : {");
+      var items = "Send tag to see the associated message\nTags for this group:\n";
+      var item;
+      result.rows.forEach(function(item) {
+        console.log(item.tag);
+        items = items + "#" + item.tag + "\n";
+      });
+      if (items) {
+        bot.sendMessage(msg.chat.id, items);
+        console.log("}\n");
       }
-    });
+    }
   });
 });
 
