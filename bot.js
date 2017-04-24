@@ -58,13 +58,17 @@ bot.onText(/\/save (.+)/, function(msg) {
   db.exec('INSERT INTO tags (?,?)', [tagg, messagee]);
 });
 
-bot.onText(/\/gshow (.+)/, function(msg) {
+bot.onText(/^#([a-zA-Z0-9_\-]+)$/, function(msg) {
+  console.log("tag retrieval: " + msg.text);
   var tag = msg.text.slice(msg.text.indexOf("#") + 1);
-  console.log(tag);
-  var result = db.exec('SELECT message FROM tags  WHERE tag=?', [tag]);
-  console.log(result[0].message);
-//  console.log(db.exec('Select * FROM tags'));
-  bot.sendMessage(msg.chat.id, result[0].message);
+  if (tag) {
+    console.log("#" + tag);
+    var result = db.exec('SELECT message FROM tags  WHERE tag=?', [tag]);
+    if (result && result[0] && result[0].message) {
+      console.log(result[0].message);
+      bot.sendMessage(msg.chat.id, result[0].message);
+    }
+  }
 });
 
 bot.onText(/\/google (.+)/, function (msg) {
