@@ -17,6 +17,7 @@
     "express": "^4.13.4",
     "google": "^2.1.0",
     "google-translate-api": "^2.2.2",
-    "node-telegram-bot-api": "^0.21.1"
+    "node-telegram-bot-api": "^0.21.1",
+    "pg": "6.x"
   }
 }

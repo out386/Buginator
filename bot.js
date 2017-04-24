@@ -4,10 +4,9 @@ var Bot = require('node-telegram-bot-api');
 var bot;
 var google = require('google')
 const translate = require('google-translate-api');
-var alasql = require('alasql');
-var db = new alasql.Database();
+var pg = require('pg');
 
-db.exec('CREATE TABLE tags (id STRING, tag STRING, message STRING, UNIQUE KEY uk (id, tag))');
+//db.exec('CREATE TABLE tags (id STRING, tag STRING, message STRING, UNIQUE KEY uk (id, tag))');
 
 google.resultsPerPage = 10
 
@@ -53,36 +52,60 @@ bot.onText(/\/save (.+)/, function(msg) {
   var message = text.slice(tagEndIndex+1);
   console.log(msg.chat.id + ": #" + tag + " = " + message + "\n");
 
-  db.exec('REPLACE INTO tags (?,?,?)', [msg.chat.id, tag, message]);
+  var query = "insert into tags (id, tag, message) values ('" + msg.chat.id
+      + "','" + tag
+      + "','" + message + "')"
+      + "on conflict on constraint uk do update set id='"
+      + msg.chat.id + "', tag='"
+      + tag + "', message='"
+      + message + "'";
+  console.log(query);
+  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+    client.query(query, function(err, result) {
+      done();
+    });
+  });
 });
 
 bot.onText(/^#([a-zA-Z0-9_\-]+)$/, function(msg) {
   console.log("tag retrieval: " + msg.text);
   var tag = msg.text.slice(msg.text.indexOf("#") + 1);
   if (tag) {
-    var result = db.exec('SELECT message FROM tags  WHERE id=? AND tag=?', [msg.chat.id, tag]);
-    if (result && result[0] && result[0].message) {
-      console.log(result[0].message + "\n");
-      bot.sendMessage(msg.chat.id, result[0].message);
-    }
+    var query = "SELECT message FROM tags WHERE id='"
+        + msg.chat.id + "' AND tag='"
+        + tag + "'";
+    console.log(query);
+    pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+      client.query(query, function(err, result) {
+        done();
+        //if (result && result[0] && result[0].message) {
+      console.log(result.rows[0].message + "\n");
+      bot.sendMessage(msg.chat.id, result.rows[0].message);
+      });
+    });
   }
 });
 
-bot.onText(/^alltags/, function(msg) {
-  var result = db.exec('SELECT tag FROM tags WHERE id=?', [msg.chat.id]);
-  if (result) {
-    console.log("Saved tags : {");
-    var items = "Send tag to see the associated message\nTags for this group:\n";
-    var item;
-    result.forEach(function(item) {
-      console.log(item.tag);
-      items = items + "#" + item.tag + "\n";
+bot.onText(/^alltags/i, function(msg) {
+  var query = "SELECT tag FROM tags WHERE id='" + msg.chat.id + "'";
+  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+      client.query(query, function(err, result) {
+        done();
+        if (result) {
+        console.log("Saved tags : {");
+        var items = "Send tag to see the associated message\nTags for this group:\n";
+        var item;
+        result.rows.forEach(function(item) {
+          console.log(item.tag);
+          items = items + "#" + item.tag + "\n";
+        });
+        if (items) {
+          bot.sendMessage(msg.chat.id, items);
+          console.log("}\n");
+        }
+      }
     });
-    if (items) {
-      bot.sendMessage(msg.chat.id, items);
-      console.log("}\n");
-    }
-  }
+  });
 });
 
 bot.onText(/\/google (.+)/, function (msg) {
