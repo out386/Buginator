@@ -68,6 +68,23 @@ bot.onText(/^#([a-zA-Z0-9_\-]+)$/, function(msg) {
   }
 });
 
+bot.onText(/^alltags/, function(msg) {
+  var result = db.exec('SELECT tag FROM tags WHERE id=?', [msg.chat.id]);
+  if (result) {
+    console.log("Saved tags : {");
+    var items = "Send tag to see the associated message\nTags for this group:\n";
+    var item;
+    result.forEach(function(item) {
+      console.log(item.tag);
+      items = items + "#" + item.tag + "\n";
+    });
+    if (items) {
+      bot.sendMessage(msg.chat.id, items);
+      console.log("}\n");
+    }
+  }
+});
+
 bot.onText(/\/google (.+)/, function (msg) {
   var name = msg.from.first_name;
   var message = msg.text;
