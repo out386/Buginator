@@ -47,24 +47,32 @@ bot.onText(/\/pizzaplz/, function(msg) {
 bot.onText(/\/save (.+)/, function(msg) {
   var text = msg.text;
   var tagStartIndex = text.indexOf("#");
-  var tagEndIndex = text.indexOf(" ", tagStartIndex);
-  var tag = text.slice(tagStartIndex + 1, tagEndIndex);
-  var message = text.slice(tagEndIndex+1);
-  console.log(msg.chat.id + ": #" + tag + " = " + message + "\n");
-
-  var query = "insert into tags (id, tag, message) values ('" + msg.chat.id
+  var tagEndIndex;
+  var tag;
+  var message;
+  if (tagStartIndex > -1)
+    tagEndIndex = text.indexOf(" ", tagStartIndex);
+  if (tagEndIndex > -1) {
+    tag = text.slice(tagStartIndex + 1, tagEndIndex);
+    message = text.slice(tagEndIndex+1);
+    console.log(msg.chat.id + ": #" + tag + " = " + message + "\n");
+  }
+  var query;
+  if (tag) {
+    var query = "insert into tags (id, tag, message) values ('" + msg.chat.id
       + "','" + tag
       + "','" + message + "')"
       + "on conflict on constraint uk do update set id='"
       + msg.chat.id + "', tag='"
       + tag + "', message='"
       + message + "'";
-  console.log(query);
-  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
-    client.query(query, function(err, result) {
-      done();
+    console.log(query);
+    pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+      client.query(query, function(err, result) {
+        done();
+      });
     });
-  });
+  }
 });
 
 bot.onText(/^#([a-zA-Z0-9_\-]+)$/, function(msg) {
@@ -78,9 +86,10 @@ bot.onText(/^#([a-zA-Z0-9_\-]+)$/, function(msg) {
     pg.connect(process.env.DATABASE_URL, function(err, client, done) {
       client.query(query, function(err, result) {
         done();
-        //if (result && result[0] && result[0].message) {
-      console.log(result.rows[0].message + "\n");
-      bot.sendMessage(msg.chat.id, result.rows[0].message);
+        if (result && result.rows && result.rows[0] && result.rows[0].message) {
+          console.log(result.rows[0].message + "\n");
+          bot.sendMessage(msg.chat.id, result.rows[0].message);
+        }
       });
     });
   }
