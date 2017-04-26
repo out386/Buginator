@@ -42,6 +42,50 @@ bot.onText(/\/pizzaplz/, function(msg) {
   bot.sendMessage(msg.chat.id, "Go make your own pizza");
 });
 
+bot.onText(/^\/newreq (.+)/, function(msg) {
+  var req = msg.text.slice(msg.text.indexOf(" "));
+  console.log(req);
+  var from;
+
+  // No need to tag the person who made the request
+  if (msg.from.username)
+    from = msg.from.username;
+  else
+    if (msg.from.last_name)
+      from = msg.from.first_name + " " + msg.from.last_name;
+    else
+      from = msg.from.first_name;
+
+  var query = "INSERT INTO requests (chat_id, user_id, req, from_name) VALUES ("
+    + msg.chat.id + ", "
+    + msg.from.id + ", '"
+    + req + "', '"
+    + from + "')";
+  console.log(query);
+
+  pool.query(query, function(err, result) {
+    });
+});
+
+bot.onText(/^getreqs/i, function(msg) {
+  var query = "SELECT id, req, from_name FROM requests WHERE chat_id = '" + msg.chat.id + "'";
+  pool.query(query, function(err, result) {
+    if (result) {
+      console.log("Saved requests : {");
+      var items = "Requests for this group:\n";
+      var item;
+      result.rows.forEach(function(item) {
+        console.log(item.name);
+        items = items + "#" + item.id + "    " + item.req + "    by " + item.from_name + "\n\n";
+      });
+      if (items) {
+        bot.sendMessage(msg.chat.id, items);
+        console.log("}\n");
+      }
+    }
+  });
+});
+
 bot.onText(/\/save (.+)/, function(msg) {
   var text = msg.text;
   var tagStartIndex = text.indexOf("#");
