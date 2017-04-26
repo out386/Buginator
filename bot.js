@@ -43,7 +43,7 @@ bot.onText(/^\/pizzaplz/, function(msg) {
 });
 
 bot.onText(/^\/newreq (.+)/, function(msg) {
-  var req = msg.text.slice(msg.text.indexOf(" "));
+  var req = msg.text.slice(msg.text.indexOf(" ") +1);
   var from;
 
   // No need to tag the person who made the request
@@ -71,13 +71,18 @@ bot.onText(/^delreq/i, function(msg) {
     var query = "SELECT * FROM requests WHERE chat_id = " + msg.chat.id + " AND id = " + id;
     pool.query(query, function(err, result) {
       if (result && result.rows && result.rows[0]) {
-        var status = bot.getChatMember(msg.chat.id, msg.from.id).status;
         var req_user_id = result.rows[0].user_id;
-        if (req_user_id == msg.from.id || status == "creator" || status == "administrator") {
-          var delete_query = "DELETE FROM requests WHERE id = " + id + "AND chat_id = " + msg.chat.id;
-          pool.query(delete_query, function(err, result) {
-          });
-        }
+        var status = bot.getChatMember(msg.chat.id, msg.from.id);
+        status.then(function(result){
+          console.log(result.status);
+          if (req_user_id == msg.from.id || result.status == "creator" || result.status == "administrator") {
+            var delete_query = "DELETE FROM requests WHERE id = " + id + "AND chat_id = " + msg.chat.id;
+            pool.query(delete_query, function(err, result) {
+            });
+          }
+        }, function(err) {
+          console.log("getchatmemberbroke");
+        });
       }
     });
   }
