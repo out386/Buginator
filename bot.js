@@ -71,7 +71,9 @@ bot.onText(/^delreq/i, function(msg) {
     var query = "SELECT * FROM requests WHERE chat_id = " + msg.chat.id + " AND id = " + id;
     pool.query(query, function(err, result) {
       if (result && result.rows && result.rows[0]) {
-        if (result.rows[0].user_id == msg.from.id) {
+        var status = bot.getChatMember(msg.chat.id, msg.from.id).status;
+        var req_user_id = result.rows[0].user_id;
+        if (req_user_id == msg.from.id || status == "creator" || status == "administrator") {
           var delete_query = "DELETE FROM requests WHERE id = " + id + "AND chat_id = " + msg.chat.id;
           pool.query(delete_query, function(err, result) {
           });
