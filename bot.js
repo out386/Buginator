@@ -34,17 +34,16 @@ bot.onText(/KmeSpam/, function(msg) {
 //  }
 });
 
-bot.onText(/KmeStop/, function(msg) {
+bot.onText(/^KmeStop/, function(msg) {
   bot.sendMessage(msg.chat.id, "Not gonna happen, man.");
 });
 
-bot.onText(/\/pizzaplz/, function(msg) {
+bot.onText(/^\/pizzaplz/, function(msg) {
   bot.sendMessage(msg.chat.id, "Go make your own pizza");
 });
 
 bot.onText(/^\/newreq (.+)/, function(msg) {
   var req = msg.text.slice(msg.text.indexOf(" "));
-  console.log(req);
   var from;
 
   // No need to tag the person who made the request
@@ -61,18 +60,15 @@ bot.onText(/^\/newreq (.+)/, function(msg) {
     + msg.from.id + ", '"
     + req + "', '"
     + from + "')";
-  console.log(query);
 
   pool.query(query, function(err, result) {
     });
 });
 
-bot.onText(/^deletereq/i, function(msg) {
+bot.onText(/^delreq/i, function(msg) {
   var id = Number(msg.text.slice(msg.text.indexOf(" ")));
-  console.log("delete " + id);
   if (id) {
     var query = "SELECT * FROM requests WHERE chat_id = " + msg.chat.id + " AND id = " + id;
-    console.log(query);
     pool.query(query, function(err, result) {
       if (result && result.rows && result.rows[0]) {
         if (result.rows[0].user_id == msg.from.id) {
@@ -93,7 +89,7 @@ bot.onText(/^getreq/i, function(msg) {
       var item;
       result.rows.forEach(function(item) {
         if (item.id && item.req && item.from_name)
-          items = items + "#" + item.id + "    " + item.req + "  ->   by -> " + item.from_name + "\n\n";
+          items = items + "#" + item.id + "    " + item.req + "  ->   by  ->  " + item.from_name + "\n\n";
       });
       if (items) {
         bot.sendMessage(msg.chat.id, items);
@@ -124,7 +120,6 @@ bot.onText(/\/save (.+)/, function(msg) {
       + msg.chat.id + "', tag='"
       + tag + "', message='"
       + message + "'";
-    console.log(query);
 
     pool.query(query, function(err, result) {
     });
@@ -132,16 +127,13 @@ bot.onText(/\/save (.+)/, function(msg) {
 });
 
 bot.onText(/^#([a-zA-Z0-9_\-]+)$/, function(msg) {
-  console.log("tag retrieval: " + msg.text);
   var tag = msg.text.slice(msg.text.indexOf("#") + 1);
   if (tag) {
     var query = "SELECT message FROM tags WHERE id='"
         + msg.chat.id + "' AND tag='"
         + tag + "'";
-    console.log(query);
     pool.query(query, function(err, result) {
       if (result && result.rows && result.rows[0] && result.rows[0].message) {
-        console.log(result.rows[0].message + "\n");
         bot.sendMessage(msg.chat.id, result.rows[0].message);
       }
     });
@@ -152,18 +144,15 @@ bot.onText(/^alltags/i, function(msg) {
   var query = "SELECT tag FROM tags WHERE id='" + msg.chat.id + "'";
   pool.query(query, function(err, result) {
     if (result && result.rows) {
-      console.log("Saved tags : {");
       var items = "Send tag to see the associated message\nTags for this group:\n";
       var item;
       result.rows.forEach(function(item) {
         if (item.tag) {
-          console.log(item.tag);
           items = items + "#" + item.tag + "\n";
         }
       });
       if (items) {
         bot.sendMessage(msg.chat.id, items);
-        console.log("}\n");
       }
     }
   });
