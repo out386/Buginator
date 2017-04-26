@@ -20,7 +20,7 @@ console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
 
 bot.onText(/(.+)/, function (msg) {
   var id = msg.from.id;
-  if (id == "161484381") {
+  if (id == "161484381b") {
     if(msg.text == "Yes?")
       bot.sendMessage(msg.chat.id, "Explain");
     else if(msg.text == "What?")
