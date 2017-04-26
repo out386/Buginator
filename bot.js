@@ -67,20 +67,36 @@ bot.onText(/^\/newreq (.+)/, function(msg) {
     });
 });
 
-bot.onText(/^getreqs/i, function(msg) {
+bot.onText(/^deletereq/i, function(msg) {
+  var id = Number(msg.text.slice(msg.text.indexOf(" ")));
+  console.log("delete " + id);
+  if (id) {
+    var query = "SELECT * FROM requests WHERE chat_id = " + msg.chat.id + " AND id = " + id;
+    console.log(query);
+    pool.query(query, function(err, result) {
+      if (result && result.rows && result.rows[0]) {
+        if (result.rows[0].user_id == msg.from.id) {
+          var delete_query = "DELETE FROM requests WHERE id = " + id + "AND chat_id = " + msg.chat.id;
+          pool.query(delete_query, function(err, result) {
+          });
+        }
+      }
+    });
+  }
+});
+
+bot.onText(/^getreq/i, function(msg) {
   var query = "SELECT id, req, from_name FROM requests WHERE chat_id = '" + msg.chat.id + "'";
   pool.query(query, function(err, result) {
-    if (result) {
-      console.log("Saved requests : {");
-      var items = "Requests for this group:\n";
+    if (result && result.rows) {
+      var items = "Requests for this group:\n\n\n";
       var item;
       result.rows.forEach(function(item) {
-        console.log(item.name);
-        items = items + "#" + item.id + "    " + item.req + "    by " + item.from_name + "\n\n";
+        if (item.id && item.req && item.from_name)
+          items = items + "#" + item.id + "    " + item.req + "  ->   by -> " + item.from_name + "\n\n";
       });
       if (items) {
         bot.sendMessage(msg.chat.id, items);
-        console.log("}\n");
       }
     }
   });
@@ -135,13 +151,15 @@ bot.onText(/^#([a-zA-Z0-9_\-]+)$/, function(msg) {
 bot.onText(/^alltags/i, function(msg) {
   var query = "SELECT tag FROM tags WHERE id='" + msg.chat.id + "'";
   pool.query(query, function(err, result) {
-    if (result) {
+    if (result && result.rows) {
       console.log("Saved tags : {");
       var items = "Send tag to see the associated message\nTags for this group:\n";
       var item;
       result.rows.forEach(function(item) {
-        console.log(item.tag);
-        items = items + "#" + item.tag + "\n";
+        if (item.tag) {
+          console.log(item.tag);
+          items = items + "#" + item.tag + "\n";
+        }
       });
       if (items) {
         bot.sendMessage(msg.chat.id, items);
