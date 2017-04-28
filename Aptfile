@@ -1,0 +1,12 @@
+git
+libpython-dev
+lua
+libreadline-dev
+libconfig-dev
+libssl-dev
+libnotify-dev
+libjansson-dev
+lua5.2
+liblua5.2-dev
+libevent-dev
+make
