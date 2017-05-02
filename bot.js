@@ -312,7 +312,6 @@ function removeUserFromGroup(userId, groupId) {
 
 function addUser(username, userId, chatId) {
   if (!username || !userId) return
-  console.log("adding");
 
   var loweredUsername = username.toLowerCase()
   var query = "INSERT INTO users VALUES (" + userId + ", '" + loweredUsername + "')";
@@ -435,7 +434,6 @@ bot.on('message', (msg) => {
       (msg.chat.type !== 'group' && msg.chat.type !== 'supergroup') ||
       (msg.forward_from && msg.forward_from.id == bot.myId)
     ) return
-  console.log("about to notify");
   var toBeNotified = new Set() // avoid duplicate notifications if tagged twice
 
   // Text messages
@@ -490,9 +488,7 @@ bot.on('message', (msg) => {
 
 bot.onText(/!addgroup/, (msg) => {
   if (msg.from) {
-    console.log("owner: " + process.env.OWNER);
     if (msg.from.id == process.env.OWNER) {
-      console.log("adding group. Chat id : " + msg.chat.id);
       var query = "INSERT INTO authorized_chats VALUES (" + msg.chat.id + ")";
       pool.query(query, (err, result) => {});
     }
