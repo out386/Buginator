@@ -368,7 +368,7 @@ function notifyUser(user, msg, silent) {
   if (user.substring) { // user is a string -> get id from db
     var query = "SELECT id FROM users WHERE username='" + user.toLowerCase() + "'";
     pool.query(query, (err, result) => {
-      if (!err && result && result.rows) {
+      if (!err && result && result.rows && result.rows[0] && result.rows[0].id) {
         notify(result.rows[0].id)
       }
     });
@@ -482,7 +482,7 @@ bot.on('message', (msg) => {
   // let's really send notifications
   toBeNotified.forEach((username) => {
     // check if user is tagging himself
-    if (!isEqual(msg.from.username, username) || DEBUG) {
+    if (!isEqual(msg.from.username, username)) {
       notifyUser(username, msg, false)
     }
   })
