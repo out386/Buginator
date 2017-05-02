@@ -1,13 +1,15 @@
 module.exports = {
-    'booting':            '@%s is starting now.',
-    'add_to_group':       'Add me to a group!',
-    'start_group':        'Contact me in private for more infos and enabling me.',
+    'add_to_group':       'Add the bot to a group!',
+    'start_group':        'Send a private message for more info to enable alerts.',
     'start_private':      'Hello.\n' +
-                          '<b>You are now enabled</b> to receive notifications from me, ' +
-                          'Just add @TagAlertBot in your groups and I\'ll start working.\n' +
-                          'When you\'ll get tagged I\'ll send a message to you.\n\n' +
-                          'Source code and infos: http://tagalert.pitasi.space/\n' +
-                          ' - a bot by @Zaphodias.',
+                          '<b>You are now enabled</b> to receive notifications, ' +
+                          'Just add @BigBug_Bot in your groups.\n' +
+                          'When you\'ll get tagged you\'ll get a message.\n\n' +
+                          'Source code and info for @TagAlertBot: http://tagalert.pitasi.space/\n\n' +
+                          ' - @TagAlertBot is a bot by @Zaphodias. This bot contains code copied from it for the tag alert funtionality.\n' +
+                          'The rest of the features were added hurridly by @out386, after an unhealthy ammout of Googling, because he still <b>DOESN\'T GET JS!</b>\n.'+
+                          'Send /help for other features. The unreadably dirty source is at https://github.com/out386/Buginator/\n' +
+                          'Written hastily on top of https://github.com/volodymyrlut/heroku-node-telegram-bot and https://github.com/yagop/node-telegram-bot-api',
     'main_text':          '<b>[ Incoming Message ]</b>\n\n' +
                           '<b>[ FROM ]</b>\n' +
                           '\uD83D\uDC64' +
@@ -29,8 +31,4 @@ module.exports = {
     'no_username':        'Sorry.\nYou need to set an username from Telegram\'s settings before using me.',
     'error':              'Sorry.\nSomething went wrong.',
     'flooding':           'Too many requests! Try again in a few minutes.',
-    'settings':           'Admin Control Panel',
-    'admin_settings':     'Enable/disable #admin',
-    'everyone_settings':  'Enable/disable #everyone',
-    'settings_updated':   '%s is now %s.'
 }
