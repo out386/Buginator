@@ -425,6 +425,19 @@ bot.on('message', (msg) => {
       removeUserFromGroup(userId, msg.chat.id)
     return
   }
+  else if (msg.new_chat_member) {
+    // Checking if the bot got added to a chat
+    if (msg.new_chat_member.id == 263194461) {
+     // authorized_chats is populated manually right now
+      var query = "SELECT chat_id FROM authorized_chats WHERE chat_id=" + msg.chat.id;
+      pool.query(query, (err, result) => {
+        // so many checks because I just want this to work, not gonna do it properly and read the docs for what it returns :3
+        if (err || !result || !result.rows || !result.rows[0]) {
+          bot.leaveChat(msg.chat.id);
+        }
+      });
+    }
+  }
 
   if (
       (msg.chat.type !== 'group' && msg.chat.type !== 'supergroup') ||
