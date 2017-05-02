@@ -7,7 +7,7 @@ module.exports = {
                           'When you\'ll get tagged you\'ll get a message.\n\n' +
                           'Source code and info for @TagAlertBot: http://tagalert.pitasi.space/\n\n' +
                           ' - @TagAlertBot is a bot by @Zaphodias. This bot contains code copied from it for the tag alert funtionality.\n' +
-                          'The rest of the features were added hurridly by @out386, after an unhealthy ammout of Googling, because he still <b>DOESN\'T GET JS!</b>\n.'+
+                          'The rest of the features were added hurridly by @out386, after an unhealthy amount of Googling, because he still <b>DOESN\'T GET JS!</b>\n.'+
                           'Send /help for other features. The unreadably dirty source is at https://github.com/out386/Buginator/\n' +
                           'Written hastily on top of https://github.com/volodymyrlut/heroku-node-telegram-bot and https://github.com/yagop/node-telegram-bot-api',
     'main_text':          '<b>[ Incoming Message ]</b>\n\n' +

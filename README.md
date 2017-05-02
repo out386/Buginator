@@ -1,4 +1,37 @@
-# heroku-node-telegram-bot
+# Buginator  
+A Telegram bot with some random features. Most commands do not require a leading "/", to minimize the chances of people tapping it repeatedly to spam (been there, done that).  
+  
+Inline functions:  
+@BigBug_bot g (query) : Perform an inline/interactive Google Search.  
+@BigBug_bot t (text) : Translate text to english (currently broken).  
+  
+  
+Misc:  
+KmeStop : No, I won't.  
+pizzaplz : Why?  
+  
+  
+Group tag management:  
+/save #(tag) message : Save a message  
+#(tag) : show the saved message.  
+alltags : List all tags in the current group.   
+  
+Request management:  
+
+Stores the provided message in a list.  
+/newreq (request) : make a new request.  
+getreq : show all requests for the group.  
+delreq (request id) : delete the request for the group (group admins and original requester only).  
+
+TagAlert:
+  
+This bot also contains a copy of https://github.com/Pitasi/TagAlertBot. This was done because the original bot couldn't reliably disable the #everyone and #admin tags, until the developer of TagAlertBot fixes the problem.  
+This bot needs the "privacy" attribute to be set to "disabled" from Botfather.  
+
+This bot was written using https://github.com/volodymyrlut/heroku-node-telegram-bot. The below are the hosting instructions/README from heroku-node-telegram-bot.  
+
+
+# heroku-node-telegram-bot  
 Starter pack for running telegram bot on the Heroku using Node.js
 
 #Step-by-step
