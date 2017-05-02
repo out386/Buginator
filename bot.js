@@ -293,21 +293,17 @@ module.exports = bot;
 
 var af = new AntiFlood()
 
-// Send a message to the admin when bot starts
-bot.getMe().then((me) => {
-  bot.myId = me.id
-  bot.sendMessage(config.adminId, util.format(replies.booting, me.username))
-})
-
 function removeGroup(groupId) {
-  db.run("DELETE FROM groups WHERE groupId=?", groupId, (err) => {
+  var query = "DELETE FROM groups WHERE groupId=" + groupId;
+  pool.query(query, (err, result) => {
     if (err) return
     console.log("Removing group %s", groupId)
   })
 }
 
 function removeUserFromGroup(userId, groupId) {
-  db.run("DELETE FROM groups WHERE userId=? AND groupId=?", userId, groupId, (err) => {
+  var query = "DELETE FROM groups WHERE userId=" + userId + " AND groupId=" + groupId;
+  pool.query(query, (err, result) => {
     if (err) return
     console.log("Removing @%s from group %s", userId, groupId)
   })
@@ -315,19 +311,23 @@ function removeUserFromGroup(userId, groupId) {
 
 function addUser(username, userId, chatId) {
   if (!username || !userId) return
+  console.log("adding");
 
   var loweredUsername = username.toLowerCase()
-  db.run("INSERT INTO users VALUES (?, ?)", userId, loweredUsername, (err, res) => {
+  var query = "INSERT INTO users VALUES (" + userId + ", '" + loweredUsername + "')";
+  pool.query(query, (err, result) => {
     if (err) {
       // User already in db, updating him
-      db.run("UPDATE users SET username=? WHERE id=?", loweredUsername, userId, (err, res) => {})
+      query = "UPDATE users SET username='" + loweredUsername + "' WHERE id=" + userId;
+      pool.query(query, (err, result) => {})
     }
     else
       console.log("Added @%s (%s) to database", loweredUsername, userId)
   })
 
   if (userId !== chatId)
-    db.run("INSERT INTO groups VALUES (?, ?)", chatId, userId, (err) => {})
+    query = "INSERT INTO groups VALUES (" + chatId + ", " + userId + ")";
+    pool.query(query, (err, result) => {})
 }
 
 function notifyUser(user, msg, silent) {
@@ -365,86 +365,28 @@ function notifyUser(user, msg, silent) {
   }
 
   if (user.substring) { // user is a string -> get id from db
-    db.each("SELECT id FROM users WHERE username=?", user.toLowerCase(), (err, row) => {
-      if (err) return
-      notify(row.id)
-    })
+    var query = "SELECT id FROM users WHERE username='" + user.toLowerCase() + "'";
+    pool.query(query, (err, result) => {
+      if (!err && result && result.rows) {
+        notify(result.rows[0].id)
+      }
+    });
   }
   // user is a number, already the id
   else if (user.toFixed) notify(user)
 }
 
-function notifyEveryone(user, groupId, msg) {
-  db.each("SELECT userId FROM groups WHERE groupId=? AND userId<>?", groupId, user, (err, row) => {
-    if (err) return
-    notifyUser(row.userId, msg, true)
-  })
-}
-
-function updateSettings(setting, chatId, callback) {
-  db.get("SELECT * FROM groupSettings WHERE groupId=?", chatId, (err, row) => {
-    if (err) return console.error(err)
-    if (row) {
-      // group is present in db
-      var newValue = row
-      newValue[setting] = 1 - newValue[setting]
-      db.run("UPDATE groupSettings SET admin=?,everyone=? WHERE groupId=?", newValue.admin, newValue.everyone, chatId, (err, res) => {
-        callback(setting, newValue[setting])
-      })
-    }
-    else {
-      // group is changing settings for the first time
-      var defaultValue = {admin: 1, everyone: 0}
-      defaultValue[setting] = 1 - defaultValue[setting]
-      db.run("INSERT INTO groupSettings VALUES (?,?,?)", chatId, defaultValue.admin, defaultValue.everyone, (err, res) => {
-        console.log(2, setting, defaultValue)
-        callback(setting, defaultValue[setting])
-      })
-    }
-  })
-}
-
-function getSetting(setting, chatId, callback) {
-  db.get("SELECT * FROM groupSettings WHERE groupId=?", chatId, (err, row) => {
-    if (err) return console.error(err)
-    if (row) {
-      if (row[setting]) callback()
-    }
-    else {
-      var defaultValue = {admin: 1, everyone: 0}
-      if (defaultValue[setting]) callback()
-    }
-  })
-}
-
 bot.on('callback_query', (call) => {
   if (!af.isFlooding(call.from.id)) {
-    switch (call.data) {
-      case 'admin':
-      case 'everyone':
-        bot.getChatAdministrators(call.message.chat.id).then((admins) => {
-          admins.forEach((admin) => {
-            if (call.message.chat.all_members_are_administrators || admin.user.id === call.from.id)
-              return updateSettings(call.data, call.message.chat.id, (setting, status) => {
-                bot.answerCallbackQuery(
-                  call.id, util.format(replies.settings_updated, '#'+setting, status?'enabled':'disabled'), true)
-              })
-
-          })
-        })
-        break
-      default:
-        var splitted = call.data.split('_')
-        if (splitted[0] === '/retrieve') {
-          var messageId = splitted[1]
-          var groupId = splitted[2]
-          bot.sendMessage(-parseInt(groupId),
-          util.format(replies.retrieve_group, call.from.username?'@'+call.from.username:call.from.first_name),
-          {reply_to_message_id: parseInt(messageId)})
-          bot.answerCallbackQuery(call.id, replies.retrieve_success, true)
-        }
-        break
-    }
+    var splitted = call.data.split('_')
+    if (splitted[0] === '/retrieve') {
+      var messageId = splitted[1]
+      var groupId = splitted[2]
+      bot.sendMessage(-parseInt(groupId),
+      util.format(replies.retrieve_group, call.from.username?'@'+call.from.username:call.from.first_name),
+      {reply_to_message_id: parseInt(messageId)})
+      bot.answerCallbackQuery(call.id, replies.retrieve_success, true)
+      }
   }
   else bot.answerCallbackQuery(call.id, replies.flooding, true)
 })
@@ -471,24 +413,6 @@ bot.onText(/^\/info$|^\/info@TagAlertBot$/gi, (msg) => {
   }
 })
 
-bot.onText(/^\/settings(.*)$/gi, (msg) => {
-  if (msg.chat.type === 'private') return
-  bot.getChatAdministrators(msg.chat.id).then((admins) => {
-    admins.forEach((admin) => {
-      if (admin.user.id === msg.from.id)
-        bot.sendMessage(msg.chat.id, replies.settings, {
-          reply_markup: {
-            inline_keyboard: [
-              [{text: replies.admin_settings, callback_data: 'admin'}],
-              [{text: replies.everyone_settings, callback_data: 'everyone'}]
-            ]
-          }
-        })
-        return
-    })
-  })
-})
-
 bot.on('message', (msg) => {
   addUser(msg.from.username, msg.from.id, msg.chat.id)
 
@@ -506,7 +430,7 @@ bot.on('message', (msg) => {
       (msg.chat.type !== 'group' && msg.chat.type !== 'supergroup') ||
       (msg.forward_from && msg.forward_from.id == bot.myId)
     ) return
-
+  console.log("about to notify");
   var toBeNotified = new Set() // avoid duplicate notifications if tagged twice
 
   // Text messages
@@ -525,23 +449,6 @@ bot.on('message', (msg) => {
       if (entity.type === 'mention') {
         var username = extract(entity)
         toBeNotified.add(username)
-      }
-
-      // Hashtags
-      else if (entity.type === 'hashtag') {
-        var hashtag = extract(entity)
-        if (hashtag === 'everyone') {
-          getSetting('everyone', msg.chat.id, () => {
-              notifyEveryone(msg.from.id, msg.chat.id, msg)
-          })
-        }
-        else if (hashtag === 'admin') {
-          getSetting('admin', msg.chat.id, () => {
-            bot.getChatAdministrators(msg.chat.id).then((admins) => {
-              admins.forEach((admin) => { notifyUser(admin.user.id, msg, false) })
-            })
-          })
-        }
       }
 
       // Users without username

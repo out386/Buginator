@@ -1,11 +1,9 @@
-var config = require('./config.js')
-
 function AntiFlood() {
   this.users = {}
 
   this.isFlooding = (userId) => {
     this.users[userId] = (this.users[userId] || 0) + 1
-    return (this.users[userId] >= config.antiflood)
+    return (this.users[userId] >= 2)
   }
 
   setInterval(() => {
