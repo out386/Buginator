@@ -19,5 +19,9 @@
     "google-translate-api": "^2.2.2",
     "node-telegram-bot-api": "^0.27.0",
     "pg": "6.x"
+  },
+  "engines": {
+    "node": "7.x",
+    "npm":  "7.x"
   }
 }
