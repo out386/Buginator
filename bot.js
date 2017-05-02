@@ -274,9 +274,10 @@ bot.on('inline_query', function(msg) {
 //  console.log("here "+msg.id+" results are :"+results);
 });
 
-module.exports = bot;
 
-
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 //------------------------------------------------------------------------------------//
 //			TagAlertBot						      //
@@ -427,16 +428,7 @@ bot.on('message', (msg) => {
   }
   else if (msg.new_chat_member) {
     // Checking if the bot got added to a chat
-    if (msg.new_chat_member.id == 263194461) {
-     // authorized_chats is populated manually right now
-      var query = "SELECT chat_id FROM authorized_chats WHERE chat_id=" + msg.chat.id;
-      pool.query(query, (err, result) => {
-        // so many checks because I just want this to work, not gonna do it properly and read the docs for what it returns :3
-        if (err || !result || !result.rows || !result.rows[0]) {
-          bot.leaveChat(msg.chat.id);
-        }
-      });
-    }
+    leave_check(msg);
   }
 
   if (
@@ -495,3 +487,30 @@ bot.on('message', (msg) => {
     }
   })
 })
+
+bot.onText(/!addgroup/, (msg) => {
+  if (msg.from) {
+    console.log("owner: " + process.env.OWNER);
+    if (msg.from.id == process.env.OWNER) {
+      console.log("adding group. Chat id : " + msg.chat.id);
+      var query = "INSERT INTO authorized_chats VALUES (" + msg.chat.id + ")";
+      pool.query(query, (err, result) => {});
+    }
+  }
+});
+
+async function leave_check(msg) {
+  if (msg.new_chat_member.id == 263194461) {
+    await sleep(20000);
+    // authorized_chats is populated manually right now
+    var query = "SELECT chat_id FROM authorized_chats WHERE chat_id=" + msg.chat.id;
+    pool.query(query, (err, result) => {
+      // so many checks because I just want this to work, not gonna do it properly and read the doc$
+      if (err || !result || !result.rows || !result.rows[0]) {
+        bot.leaveChat(msg.chat.id);
+      }
+    });
+  }
+}
+
+module.exports = bot;
