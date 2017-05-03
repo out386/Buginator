@@ -395,12 +395,7 @@ bot.onText(/\/start/, (msg) => {
   if (msg.chat.type !== 'private') return
 
   if (!af.isFlooding(msg.from.id)) {
-    bot.sendMessage(msg.chat.id, replies.start_private,
-                    {
-                      parse_mode: 'HTML',
-                      reply_markup: {inline_keyboard: [[{text: replies.add_to_group, url: 't.me/TagAlertBot?startgroup=true'}]]}
-                    }
-    )
+    bot.sendMessage(msg.chat.id, replies.start_private)
   }
 })
 
