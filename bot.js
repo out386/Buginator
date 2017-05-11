@@ -65,6 +65,8 @@ bot.onText(/^\/newreq (.+)/, function(msg) {
     + from + "')";
 
   pool.query(query, function(err, result) {
+    if (! err)
+      bot.sendMessage(msg.chat.id, "\"" + req + "\" was added. You aren\'t gonna \"getreq\" spam now, right?", {reply_to_message_id: msg.message_id});
     });
 });
 
@@ -75,12 +77,15 @@ bot.onText(/^delreq/i, function(msg) {
     pool.query(query, function(err, result) {
       if (result && result.rows && result.rows[0]) {
         var req_user_id = result.rows[0].user_id;
+        var req = result.rows[0].req;
         var status = bot.getChatMember(msg.chat.id, msg.from.id);
         status.then(function(result){
           console.log(result.status);
           if (req_user_id == msg.from.id || result.status == "creator" || result.status == "administrator") {
             var delete_query = "DELETE FROM requests WHERE id = " + id + "AND chat_id = " + msg.chat.id;
             pool.query(delete_query, function(err, result) {
+              if (! err)
+                bot.sendMessage(msg.chat.id, "#" + id + ", \"" + req + "\", was deleted. ", {reply_to_message_id: msg.message_id});
             });
           }
         }, function(err) {
@@ -92,7 +97,7 @@ bot.onText(/^delreq/i, function(msg) {
 });
 
 bot.onText(/^getreq/i, function(msg) {
-  var query = "SELECT id, req, from_name FROM requests WHERE chat_id = '" + msg.chat.id + "'";
+  var query = "SELECT id, req, from_name FROM requests WHERE chat_id = '" + msg.chat.id + "' ORDER BY id";
   pool.query(query, function(err, result) {
     if (result && result.rows) {
       var items = "Requests for this group:\n\n\n";
