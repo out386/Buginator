@@ -31,4 +31,5 @@ module.exports = {
     'no_username':        'Sorry.\nYou need to set an username from Telegram\'s settings before using me.',
     'error':              'Sorry.\nSomething went wrong.',
     'flooding':           'Too many requests! Try again in a few minutes.',
+    'kick_text':          'Please remove yourself from this group, because I\'m too polite to do it myself.',
 }

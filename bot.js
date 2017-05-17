@@ -45,6 +45,11 @@ bot.onText(/^\/pizzaplz/, function(msg) {
   bot.sendMessage(msg.chat.id, "Go make your own pizza");
 });
 
+bot.onText(/^\/kick/, (msg) => {
+  if (msg.reply_to_message)
+    bot.sendMessage(msg.chat.id, replies.kick_text, {reply_to_message_id: msg.reply_to_message.message_id});
+});
+
 bot.onText(/^\/newreq (.+)/, function(msg) {
   var req = msg.text.slice(msg.text.indexOf(" ") +1);
   var from;
