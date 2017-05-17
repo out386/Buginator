@@ -68,7 +68,7 @@ bot.onText(/^\/newreq (.+)/, function(msg) {
     if (! err)
       bot.sendMessage(msg.chat.id, "\"" + req + "\" was added. You aren\'t gonna \"getreq\" spam now, right?", {reply_to_message_id: msg.message_id})
         .then((m) => {
-          deleteMsg(m, 5000);
+          deleteMsg(m, 15000);
         });
     });
 });
@@ -90,7 +90,7 @@ bot.onText(/^delreq/i, function(msg) {
               if (! err)
                 bot.sendMessage(msg.chat.id, "#" + id + ", \"" + req + "\", was deleted. ", {reply_to_message_id: msg.message_id})
                   .then((m) => {
-                    deleteMsg(m, 5000);
+                    deleteMsg(m, 15000);
                 });
             });
           }
@@ -115,7 +115,7 @@ bot.onText(/^getreq/i, function(msg) {
       if (items) {
         bot.sendMessage(msg.chat.id, items)
           .then((m) => {
-            deleteMsg(m, 5000);
+            deleteMsg(m, 15000);
           });
       }
     }
@@ -178,7 +178,7 @@ bot.onText(/^alltags/i, function(msg) {
       if (items) {
         bot.sendMessage(msg.chat.id, items)
           .then((m) => {
-            deleteMsg(m, 5000);
+            deleteMsg(m, 15000);
           });
       }
     }
