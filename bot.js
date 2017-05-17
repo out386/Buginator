@@ -405,6 +405,9 @@ bot.on('callback_query', (call) => {
       bot.sendMessage(-parseInt(groupId),
       util.format(replies.retrieve_group, call.from.username?'@'+call.from.username:call.from.first_name),
       {reply_to_message_id: parseInt(messageId)})
+        .then((m) => {
+          deleteMsg(m, 20000)
+        })
       bot.answerCallbackQuery(call.id, replies.retrieve_success, true)
       }
   }
