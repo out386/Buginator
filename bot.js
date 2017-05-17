@@ -68,7 +68,7 @@ bot.onText(/^\/newreq (.+)/, function(msg) {
     if (! err)
       bot.sendMessage(msg.chat.id, "\"" + req + "\" was added. You aren\'t gonna \"getreq\" spam now, right?", {reply_to_message_id: msg.message_id})
         .then((m) => {
-          deleteMsg(m);
+          deleteMsg(m, 5000);
         });
     });
 });
@@ -90,7 +90,7 @@ bot.onText(/^delreq/i, function(msg) {
               if (! err)
                 bot.sendMessage(msg.chat.id, "#" + id + ", \"" + req + "\", was deleted. ", {reply_to_message_id: msg.message_id})
                   .then((m) => {
-                    deleteMsg(m);
+                    deleteMsg(m, 5000);
                 });
             });
           }
@@ -115,7 +115,7 @@ bot.onText(/^getreq/i, function(msg) {
       if (items) {
         bot.sendMessage(msg.chat.id, items)
           .then((m) => {
-            deleteMsg(m);
+            deleteMsg(m, 5000);
           });
       }
     }
@@ -178,7 +178,7 @@ bot.onText(/^alltags/i, function(msg) {
       if (items) {
         bot.sendMessage(msg.chat.id, items)
           .then((m) => {
-            deleteMsg(m);
+            deleteMsg(m, 5000);
           });
       }
     }
@@ -291,8 +291,8 @@ bot.on('inline_query', function(msg) {
 //  console.log("here "+msg.id+" results are :"+results);
 });
 
-async function deleteMsg (msg) {
-  await sleep (5000);
+async function deleteMsg (msg, time) {
+  await sleep (time);
   bot.deleteMessage(msg.message_id, msg.chat.id);
 }
 function sleep(ms) {
@@ -370,9 +370,7 @@ function notifyUser(user, msg, silent) {
         var final_text = util.format(replies.main_caption, from, msg.chat.title, msg.caption)
         var file_id = msg.photo[0].file_id
         bot.sendPhoto(userId, file_id, {caption: final_text, reply_markup: btn})
-          .then((m)=>{
-            deleteMsg(m);
-          }, ()=>{})
+          .then((m)=>{}, ()=>{})
       }
       else {
         var final_text = util.format(replies.main_text, from, msg.chat.title, msg.text)
@@ -381,9 +379,7 @@ function notifyUser(user, msg, silent) {
                         {parse_mode: 'HTML',
                          reply_markup: btn,
 			 disable_notification: silent})
-          .then((m)=>{
-            deleteMsg(m);
-          }, ()=>{})
+          .then((m)=>{}, ()=>{})
       }
     })
   }
