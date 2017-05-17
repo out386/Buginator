@@ -66,7 +66,10 @@ bot.onText(/^\/newreq (.+)/, function(msg) {
 
   pool.query(query, function(err, result) {
     if (! err)
-      bot.sendMessage(msg.chat.id, "\"" + req + "\" was added. You aren\'t gonna \"getreq\" spam now, right?", {reply_to_message_id: msg.message_id});
+      bot.sendMessage(msg.chat.id, "\"" + req + "\" was added. You aren\'t gonna \"getreq\" spam now, right?", {reply_to_message_id: msg.message_id})
+        .then((m) => {
+          deleteMsg(m);
+        });
     });
 });
 
@@ -85,7 +88,10 @@ bot.onText(/^delreq/i, function(msg) {
             var delete_query = "DELETE FROM requests WHERE id = " + id + "AND chat_id = " + msg.chat.id;
             pool.query(delete_query, function(err, result) {
               if (! err)
-                bot.sendMessage(msg.chat.id, "#" + id + ", \"" + req + "\", was deleted. ", {reply_to_message_id: msg.message_id});
+                bot.sendMessage(msg.chat.id, "#" + id + ", \"" + req + "\", was deleted. ", {reply_to_message_id: msg.message_id})
+                  .then((m) => {
+                    deleteMsg(m);
+                });
             });
           }
         }, function(err) {
@@ -107,7 +113,10 @@ bot.onText(/^getreq/i, function(msg) {
           items = items + "#" + item.id + "    " + item.req + "  ->   by  ->  " + item.from_name + "\n\n";
       });
       if (items) {
-        bot.sendMessage(msg.chat.id, items);
+        bot.sendMessage(msg.chat.id, items)
+          .then((m) => {
+            deleteMsg(m);
+          });
       }
     }
   });
@@ -167,7 +176,10 @@ bot.onText(/^alltags/i, function(msg) {
         }
       });
       if (items) {
-        bot.sendMessage(msg.chat.id, items);
+        bot.sendMessage(msg.chat.id, items)
+          .then((m) => {
+            deleteMsg(m);
+          });
       }
     }
   });
@@ -279,7 +291,10 @@ bot.on('inline_query', function(msg) {
 //  console.log("here "+msg.id+" results are :"+results);
 });
 
-
+async function deleteMsg (msg) {
+  await sleep (5000);
+  bot.deleteMessage(msg.message_id, msg.chat.id);
+}
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -355,7 +370,9 @@ function notifyUser(user, msg, silent) {
         var final_text = util.format(replies.main_caption, from, msg.chat.title, msg.caption)
         var file_id = msg.photo[0].file_id
         bot.sendPhoto(userId, file_id, {caption: final_text, reply_markup: btn})
-           .then(()=>{}, ()=>{})
+          .then((m)=>{
+            deleteMsg(m);
+          }, ()=>{})
       }
       else {
         var final_text = util.format(replies.main_text, from, msg.chat.title, msg.text)
@@ -364,7 +381,9 @@ function notifyUser(user, msg, silent) {
                         {parse_mode: 'HTML',
                          reply_markup: btn,
 			 disable_notification: silent})
-           .then(()=>{}, ()=>{}) // avoid logs
+          .then((m)=>{
+            deleteMsg(m);
+          }, ()=>{})
       }
     })
   }
@@ -498,15 +517,20 @@ bot.onText(/!addgroup/, (msg) => {
 async function leave_check(msg) {
   if (msg.new_chat_member.id == 263194461) {
     await sleep(20000);
-    // authorized_chats is populated manually right now
     var query = "SELECT chat_id FROM authorized_chats WHERE chat_id=" + msg.chat.id;
     pool.query(query, (err, result) => {
-      // so many checks because I just want this to work, not gonna do it properly and read the doc$
+      // so many checks because I just want this to work, not gonna do it properly and read the docs
       if (err || !result || !result.rows || !result.rows[0]) {
         bot.leaveChat(msg.chat.id);
       }
     });
   }
+}
+
+bot.deleteMessage = function (message_id, chat_id, form = {}) {
+  form.chat_id = chat_id;
+  form.message_id = message_id;
+  return this._request('deleteMessage', { form });
 }
 
 module.exports = bot;
