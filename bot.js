@@ -46,8 +46,23 @@ bot.onText(/^\/pizzaplz/, function(msg) {
 });
 
 bot.onText(/^\/kick/, (msg) => {
-  if (msg.reply_to_message)
-    bot.sendMessage(msg.chat.id, replies.kick_text, {reply_to_message_id: msg.reply_to_message.message_id});
+  if (msg.reply_to_message) {
+    var reply;
+    var reply_msg_id;
+
+    if (msg.reply_to_message.from.id == process.env.OWNER || msg.reply_to_message.from.id == process.env.THIS_BOT) {
+      if (msg.from.id == process.env.OWNER)
+        reply = replies.owner_wrong_kick;
+      else
+        reply = replies.no_kick_permissions;
+      reply_msg_id = msg.message_id;
+    }
+    else {
+      reply = replies.kick;
+      reply_msg_id = msg.reply_to_message.message_id;
+    }
+    bot.sendMessage(msg.chat.id, reply, {reply_to_message_id: reply_msg_id});
+  }
 });
 
 bot.onText(/^\/newreq (.+)/, function(msg) {
@@ -519,7 +534,7 @@ bot.onText(/!addgroup/, (msg) => {
 });
 
 async function leave_check(msg) {
-  if (msg.new_chat_member.id == 263194461) {
+  if (msg.new_chat_member.id == process.env.THIS_BOT) {
     await sleep(20000);
     var query = "SELECT chat_id FROM authorized_chats WHERE chat_id=" + msg.chat.id;
     pool.query(query, (err, result) => {
