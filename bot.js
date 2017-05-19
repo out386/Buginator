@@ -65,6 +65,11 @@ bot.onText(/^\/kick/, (msg) => {
   }
 });
 
+bot.onText(/^\/deletemsg/, (msg) => {
+// for testing deletes
+  if (msg.from.id == process.env.OWNER && msg.reply_to_message)
+    bot.deleteMessage(msg.reply_to_message.message_id, msg.chat.id);
+});
 bot.onText(/^\/newreq (.+)/, function(msg) {
   var req = msg.text.slice(msg.text.indexOf(" ") +1);
   var from;
