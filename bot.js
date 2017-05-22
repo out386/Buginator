@@ -26,8 +26,8 @@ bot.onText(/^Botspam (\d)+$/i, function(msg) {
   status.then(function(result) {
     if (result.status == "creator" || result.status == "administrator" || msg.from.id == process.env.OWNER) {
       var times = msg.text.replace(/^\D+/g, '');
-      if (times > 30)
-        bot.sendMessage(msg.chat.id, "No, I refuse to go over 30, now FO");
+      if (times > 20)
+        bot.sendMessage(msg.chat.id, "I can\'t count that high, now FO");
       else
         spam(msg, times);
     }
@@ -37,7 +37,10 @@ bot.onText(/^Botspam (\d)+$/i, function(msg) {
 async function spam(msg, times) {
   var delay = 1500;
   for( i = 1; i <= times; i++) {
-    bot.sendMessage(msg.chat.id, "Spam number: " + i + "\nTotal messages to send: " + times + "\nDelay: " + delay/1000 + " seconds\nStarted by: @" + msg.from.username);
+    bot.sendMessage(msg.chat.id, "Spam number: " + i + "\nTotal messages to send: " + times + "\nDelay: " + delay/1000 + " seconds\nStarted by: @" + msg.from.username)
+      .then((m) => {
+        deleteMsg(m,6000);
+      });
     await sleep(delay);
   }
 }
