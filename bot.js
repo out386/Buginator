@@ -21,21 +21,26 @@ else {
 
 console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
 
-bot.onText(/(.+)/, function (msg) {
-  var id = msg.from.id;
-  if (id == "161484381b") {
-    if(msg.text == "Yes?")
-      bot.sendMessage(msg.chat.id, "Explain");
-    else if(msg.text == "What?")
-      bot.sendMessage(msg.chat.id, "Nothing");
+bot.onText(/^Botspam (\d)+$/i, function(msg) {
+  var status = bot.getChatMember(msg.chat.id, msg.from.id);
+  status.then(function(result) {
+    if (result.status == "creator" || result.status == "administrator" || msg.from.id == process.env.OWNER) {
+      var times = msg.text.replace(/^\D+/g, '');
+      if (times > 30)
+        bot.sendMessage(msg.chat.id, "No, I refuse to go over 30, now FO");
+      else
+        spam(msg, times);
     }
+  });
 });
 
-bot.onText(/KmeSpam/, function(msg) {
-//  for(i=1; i<=1; i++) {
-//    bot.sendMessage(msg.chat.id, "Kmank");
-//  }
-});
+async function spam(msg, times) {
+  var delay = 1500;
+  for( i = 1; i <= times; i++) {
+    bot.sendMessage(msg.chat.id, "Spam number: " + i + "\nTotal messages to send: " + times + "\nDelay: " + delay/1000 + " seconds\nStarted by: @" + msg.from.username);
+    await sleep(delay);
+  }
+}
 
 bot.onText(/^KmeStop/, function(msg) {
   bot.sendMessage(msg.chat.id, "Not gonna happen, man.");
@@ -108,7 +113,6 @@ bot.onText(/^delreq/i, function(msg) {
         var req = result.rows[0].req;
         var status = bot.getChatMember(msg.chat.id, msg.from.id);
         status.then(function(result){
-          console.log(result.status);
           if (req_user_id == msg.from.id || result.status == "creator" || result.status == "administrator") {
             var delete_query = "DELETE FROM requests WHERE id = " + id + "AND chat_id = " + msg.chat.id;
             pool.query(delete_query, function(err, result) {
