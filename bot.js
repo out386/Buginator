@@ -75,8 +75,15 @@ bot.onText(/^\/kick/, (msg) => {
 
 bot.onText(/^\/deletemsg/, (msg) => {
 // for testing deletes
-  if (msg.from.id == process.env.OWNER && msg.reply_to_message)
-    bot.deleteMessage(msg.reply_to_message.message_id, msg.chat.id);
+  var status = bot.getChatMember(msg.chat.id, msg.from.id);
+  status.then(function(result){
+    if ((result.status == "creator" || result.status == "administrator" || msg.from.id == process.env.OWNER) && msg.reply_to_message) {
+      bot.deleteMessage(msg.reply_to_message.message_id, msg.chat.id)
+        .then(()=>{}, ()=>{});
+      bot.deleteMessage(msg.message_id, msg.chat.id)
+        .then(()=>{}, ()=>{});
+    }
+  });
 });
 bot.onText(/^\/newreq (.+)/, function(msg) {
   var req = msg.text.slice(msg.text.indexOf(" ") +1);
