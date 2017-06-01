@@ -28,28 +28,30 @@ bot.onText(/^Botspam (\d)+$/i, function(msg) {
       var times = msg.text.replace(/^\D+/g, '');
       if (times > 20)
         bot.sendMessage(msg.chat.id, "I can\'t count that high, now FO");
-      else
-        spam(msg, times);
+      else {
+        var message = "Total messages to send: " + times + "\nStarted by: @" + msg.from.username;
+        spam(msg.chat.id, times, message, true);
+      }
     }
   });
 });
 
 bot.onText(/^Bug him (\d)+$/i, function(msg) {
   if (msg.from.id == process.env.OWNER) {
-    if (msg.reply_to_msg) {
+    if (msg.reply_to_message) {
       var times = msg.text.replace(/^\D+/g, '');
-      for (i = 1; i <= times ; i++)
-        bot.sendMessage(msg.reply_to_msg.from.id, "You have been tagged. No, not really. Just an useless notification.");
+      spam(msg.reply_to_message.from.id, times, "You have been tagged. No, not really. Just an useless notification.\n@out386\'s doing.", false);
     }
   }
 });
 
-async function spam(msg, times) {
+async function spam(id, times, string, shouldDelete) {
   var delay = 1500;
   for( i = 1; i <= times; i++) {
-    bot.sendMessage(msg.chat.id, "Spam number: " + i + "\nTotal messages to send: " + times + "\nDelay: " + delay/1000 + " seconds\nStarted by: @" + msg.from.username)
+    bot.sendMessage(id, string)
       .then((m) => {
-        deleteMsg(m,6000);
+        if (shouldDelete)
+          deleteMsg(m,6000);
       });
     await sleep(delay);
   }
