@@ -496,11 +496,10 @@ bot.on('message', (msg) => {
       removeUserFromGroup(userId, msg.chat.id)
     return
   }
-  //else if (msg.new_chat_member) {
+  else if (msg.new_chat_member) {
     // Checking if the bot got added to a chat
-    if (msg.chat.type != "private")
-      leave_check(msg);
-  //}
+    leave_check(msg);
+  }
 
   if (
       (msg.chat.type !== 'group' && msg.chat.type !== 'supergroup') ||
@@ -568,22 +567,16 @@ bot.onText(/!addgroup/, (msg) => {
 });
 
 async function leave_check(msg) {
-  //if (msg.new_chat_member.id == process.env.THIS_BOT) {
+  if (msg.new_chat_member.id == process.env.THIS_BOT) {
     await sleep(20000);
     var query = "SELECT chat_id FROM authorized_chats WHERE chat_id=" + msg.chat.id;
     pool.query(query, (err, result) => {
       // so many checks because I just want this to work, not gonna do it properly and read the docs
       if (err || !result || !result.rows || !result.rows[0]) {
         bot.leaveChat(msg.chat.id);
-        var leftGroupName;
-        if (msg.chat.title)
-          leftGroupName = msg.chat.title;
-        else
-          leftGroupName = msg.chat.id;
-        bot.sendMessage(process.env.OWNER, "Just left " + leftGroupName);
       }
     });
-  //}
+  }
 }
 
 bot.deleteMessage = function (message_id, chat_id, form = {}) {
