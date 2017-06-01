@@ -34,6 +34,16 @@ bot.onText(/^Botspam (\d)+$/i, function(msg) {
   });
 });
 
+bot.onText(/^Bug him (\d)+$/i, function(msg) {
+  if (msg.from.id == process.env.OWNER) {
+    if (msg.reply_to_msg) {
+      var times = msg.text.replace(/^\D+/g, '');
+      for (i = 1; i <= times ; i++)
+        bot.sendMessage(msg.reply_to_msg.from.id, "You have been tagged. No, not really. Just an useless notification.");
+    }
+  }
+});
+
 async function spam(msg, times) {
   var delay = 1500;
   for( i = 1; i <= times; i++) {
