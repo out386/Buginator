@@ -5,6 +5,7 @@ var bot;
 var google = require('google')
 const translate = require('google-translate-api');
 const pool = require('./db');
+const fs = require('fs');
 var replies = require('./replies.js')
 var util = require('util')
 var AntiFlood = require('./antiflood.js')
@@ -58,6 +59,14 @@ async function spam(id, times, string, shouldDelete) {
     await sleep(delay);
   }
 }
+bot.onText(/^\/pun/i, function(msg) {
+  fs.readFile("./puns.txt", function(err, data) {
+    if(err)
+      return;
+    var lines = data.toString('utf8').split('\n');
+    bot.sendMessage(msg.chat.id, lines[Math.floor(Math.random()*lines.length)]);
+ });
+});
 
 bot.onText(/^KmeStop/, function(msg) {
   bot.sendMessage(msg.chat.id, "Not gonna happen, man.");
