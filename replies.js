@@ -42,5 +42,4 @@ module.exports = {
     'kick4':              '"\ngit push --force origin master',
     'no_kick_permissions':'No. You should leave instead.',
     'owner_wrong_kick':   'Uhh...',
-    'pm_flood_confirm':   'Will try for sure.'
 }
