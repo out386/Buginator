@@ -37,12 +37,22 @@ bot.onText(/^Botspam (\d)+$/i, function(msg) {
   });
 });
 
-bot.onText(/^Bug him (\d)+$/i, function(msg) {
+bot.onText(/^Bug him([a-zA-Z\s]?)+ (\d)+$/i, function(msg) {
   if (msg.from.id == process.env.OWNER) {
     if (msg.reply_to_message) {
-      var times = msg.text.replace(/^\D+/g, '');
+      var message;
+      var lastSpace = msg.text.lastIndexOf(" ");
+      var times = msg.text.slice(lastSpace + 1);
+      var messageInText = msg.text.slice(msg.text.indexOf(" ") + 1);
+      messageInText = messageInText.slice(messageInText.indexOf(" ") + 1);
+      lastSpace = messageInText.lastIndexOf(" ");
+
+      if (lastSpace > -1)
+        message = "@out386 :\n" + messageInText.slice(0, lastSpace);
+      else
+        message = "You have been tagged. No, not really. Just an useless notification.\n@out386\'s doing.";
       bot.sendMessage(msg.chat.id, "Target acquired: " + msg.reply_to_message.from.first_name);
-      spam(msg.reply_to_message.from.id, times, "You have been tagged. No, not really. Just an useless notification.\n@out386\'s doing.", false);
+      spam(msg.reply_to_message.from.id, times, message, false);
     }
   } else
       bot.sendMessage(msg.chat.id, "Uh... No.");
