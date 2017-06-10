@@ -31,7 +31,7 @@ bot.onText(/^Botspam (\d)+$/i, function(msg) {
         bot.sendMessage(msg.chat.id, "I can\'t count that high, now FO");
       else {
         var message = "Total messages to send: " + times + "\nStarted by: @" + msg.from.username;
-        spam(msg.chat.id, times, message, true);
+        spam(msg.chat.id, times, message, true, msg);
       }
     }
   });
@@ -51,20 +51,32 @@ bot.onText(/^Bug him([a-zA-Z\s]?)+ (\d)+$/i, function(msg) {
         message = "@out386 :\n" + messageInText.slice(0, lastSpace);
       else
         message = "You have been tagged. No, not really. Just an useless notification.\n@out386\'s doing.";
-      bot.sendMessage(msg.chat.id, "Target acquired: " + msg.reply_to_message.from.first_name);
-      spam(msg.reply_to_message.from.id, times, message, false);
+      spam(msg.reply_to_message.from.id, times, message, false, msg);
     }
   } else
       bot.sendMessage(msg.chat.id, "Uh... No.");
 });
 
-async function spam(id, times, string, shouldDelete) {
+async function spam(id, times, string, shouldDelete, originalMessage) {
   var delay = 1500;
+  var firstCheck = true;
   for( i = 1; i <= times; i++) {
     bot.sendMessage(id, string)
       .then((m) => {
         if (shouldDelete)
           deleteMsg(m,6000);
+        else if (firstCheck) {
+          // Assuming if !shouldDelete, then function was called from Bug me.
+          firstCheck = false;
+          bot.sendMessage(originalMessage.chat.id, "Target acquired: " + originalMessage.reply_to_message.from.first_name);
+        }
+      })
+      .catch((err) => {
+        if (!shouldDelete && firstCheck) {
+          firstCheck = false;
+          // TO-DO: check the contents of err and stop assuming too much
+          bot.sendMessage(originalMessage.chat.id, "Target didn\'t start the bot");
+        }
       });
     await sleep(delay);
   }
