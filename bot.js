@@ -41,11 +41,9 @@ bot.onText(/^Bug him (\d)+$/i, function(msg) {
   if (msg.from.id == process.env.OWNER) {
     if (msg.reply_to_message) {
       var times = msg.text.replace(/^\D+/g, '');
-      bot.sendMessage(msg.chat.id, "Target acquired: " + msg.reply_to_message.from.first_name);
       spam(msg.reply_to_message.from.id, times, "You have been tagged. No, not really. Just an useless notification.\n@out386\'s doing.", false);
     }
-  } else
-      bot.sendMessage(msg.chat.id, "Uh... No.");
+  }
 });
 
 async function spam(id, times, string, shouldDelete) {
