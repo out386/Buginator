@@ -37,12 +37,6 @@ bot.onText(/^Botspam (\d)+$/i, function(msg) {
   });
 });
 
-bot.onText(/^Bug her (\d)+$/i, (msg) => {
-      var times = msg.text.slice(msg.text.lastIndexOf(" ") + 1);
-      message = "You have been tagged. No, not really. Just an useless notification.\n@out386\'s doing.";
-      spam(msg.from.id, times, message, false, msg);
-});
-
 bot.onText(/^Bug him([a-zA-Z\s]?)+ (\d)+$/i, function(msg) {
   if (msg.from.id == process.env.OWNER) {
     if (msg.reply_to_message) {
