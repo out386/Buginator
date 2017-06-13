@@ -31,7 +31,12 @@ bot.onText(/^Botspam (\d)+$/i, function(msg) {
         bot.sendMessage(msg.chat.id, "I can\'t count that high, now FO");
       else {
         var message = "Total messages to send: " + times + "\nStarted by: @" + msg.from.username;
-        spam(msg.chat.id, times, message, true);
+        var shouldDelete;
+        if (msg.from.id == process.env.OWNER)
+          shouldDelete = false;
+        else
+          shouldDelete = true;
+        spam(msg.chat.id, times, message, shouldDelete);
       }
     }
   });
