@@ -173,14 +173,16 @@ bot.onText(/^getreq/i, function(msg) {
     if (result && result.rows) {
       var items = "Requests for this group:\n\n\n";
       var item;
+      var deleteDelay = 60000;
       result.rows.forEach(function(item) {
         if (item.id && item.req && item.from_name)
           items = items + "#" + item.id + "    " + item.req + "  ->   by  ->  " + item.from_name + "\n\n";
       });
       if (items) {
+        deleteMsg(msg, deleteDelay);
         bot.sendMessage(msg.chat.id, items)
           .then((m) => {
-            deleteMsg(m, 15000);
+            deleteMsg(m, deleteDelay);
           });
       }
     }
