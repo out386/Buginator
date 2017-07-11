@@ -142,7 +142,7 @@ bot.onText(/^\/newreq (.+)/, function(msg) {
   });
 });
 
-bot.onText(/^delreq/i, function(msg) {
+bot.onText(/^\/delreq (\d+)/i, function(msg) {
   var id = Number(msg.text.slice(msg.text.indexOf(" ")));
   if (id) {
     var query = "SELECT * FROM requests WHERE chat_id = " + msg.chat.id + " AND id = " + id;
