@@ -113,6 +113,8 @@ bot.onText(/^\/deletemsg/, (msg) => {
 });
 bot.onText(/^\/newreq (.+)/, function(msg) {
   var req = msg.text.slice(msg.text.indexOf(" ") +1);
+  req = req.replace(/'/g, "''");
+  console.log(req);
   var from;
 
   // No need to tag the person who made the request
