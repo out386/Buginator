@@ -132,7 +132,7 @@ bot.onText(/^\/newreq (.+)/, function(msg) {
 
   pool.query(query, function(err, result) {
     if (! err)
-      bot.sendMessage(msg.chat.id, "\"" + req + "\" was added. You aren\'t gonna \"getreq\" spam now, right?", {reply_to_message_id: msg.message_id})
+      bot.sendMessage(msg.chat.id, "\"" + req + "\" was added.", {reply_to_message_id: msg.message_id})
         .then((m) => {
           deleteMsg(m, 15000);
         });
@@ -179,11 +179,14 @@ bot.onText(/^getreq/i, function(msg) {
           items = items + "#" + item.id + "    " + item.req + "  ->   by  ->  " + item.from_name + "\n\n";
       });
       if (items) {
-        deleteMsg(msg, deleteDelay);
+        deleteMsg(msg, 3);
         bot.sendMessage(msg.chat.id, items)
           .then((m) => {
             deleteMsg(m, deleteDelay);
           });
+        if (msg.from.id != process.env.OWNER)
+          bot.sendMessage(msg.from.id, items)
+            .catch(err => {});
       }
     }
   });
