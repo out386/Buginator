@@ -100,7 +100,6 @@ bot.onText(/^\/kick/, (msg) => {
 });
 
 bot.onText(/^\/deletemsg/, (msg) => {
-// for testing deletes
   var status = bot.getChatMember(msg.chat.id, msg.from.id);
   status.then(function(result){
     if ((result.status == "creator" || result.status == "administrator" || msg.from.id == process.env.OWNER) && msg.reply_to_message) {
@@ -133,12 +132,14 @@ bot.onText(/^\/newreq (.+)/, function(msg) {
     + from + "')";
 
   pool.query(query, function(err, result) {
-    if (! err)
+    if (! err) {
       bot.sendMessage(msg.chat.id, "\"" + req + "\" was added.", {reply_to_message_id: msg.message_id})
         .then((m) => {
           deleteMsg(m, 15000);
         });
-    });
+      deleteMsg(msg, 3000);
+    }
+  });
 });
 
 bot.onText(/^delreq/i, function(msg) {
@@ -154,11 +155,13 @@ bot.onText(/^delreq/i, function(msg) {
           if (msg.from.id == process.env.OWNER || req_user_id == msg.from.id || result.status == "creator" || result.status == "administrator") {
             var delete_query = "DELETE FROM requests WHERE id = " + id + "AND chat_id = " + msg.chat.id;
             pool.query(delete_query, function(err, result) {
-              if (! err)
+              if (! err) {
                 bot.sendMessage(msg.chat.id, "#" + id + ", \"" + req + "\", was deleted. ", {reply_to_message_id: msg.message_id})
                   .then((m) => {
                     deleteMsg(m, 15000);
-                });
+                  });
+                deleteMsg(msg, 3000);
+              }
             });
           }
         }, function(err) {
@@ -186,7 +189,7 @@ bot.onText(/^getreq/i, function(msg) {
           items = items + "#" + item.id + "    " + item.req + "  ->   by  ->  " + item.from_name + "\n\n";
       });
       if (items) {
-        deleteMsg(msg, 3);
+        deleteMsg(msg, 3000);
         bot.sendMessage(msg.chat.id, items)
           .then((m) => {
             deleteMsg(m, deleteDelay);
