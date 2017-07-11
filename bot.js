@@ -168,7 +168,12 @@ bot.onText(/^delreq/i, function(msg) {
 });
 
 bot.onText(/^getreq/i, function(msg) {
-  var query = "SELECT id, req, from_name FROM requests WHERE chat_id = '" + msg.chat.id + "' ORDER BY id";
+  var chatId = msg.chat.id + "";
+  if (chatId == "-1001106567058")
+    chatId = chatId + "' OR chat_id = '-238473876";
+  else if (chatId == "-238473876")
+    chatId = chatId + "' OR chat_id = '-1001106567058";
+  var query = "SELECT id, req, from_name FROM requests WHERE chat_id = '" + chatId + "' ORDER BY id";
   pool.query(query, function(err, result) {
     if (result && result.rows) {
       var items = "Requests for this group:\n\n\n";
@@ -363,7 +368,8 @@ bot.on('inline_query', function(msg) {
 
 async function deleteMsg (msg, time) {
   await sleep (time);
-  bot.deleteMessage(msg.message_id, msg.chat.id);
+  bot.deleteMessage(msg.message_id, msg.chat.id)
+    .catch(err => {});
 }
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
