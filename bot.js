@@ -124,9 +124,13 @@ bot.onText(/^\/newreq (.+)/, function(msg) {
       from = msg.from.first_name + " " + msg.from.last_name;
     else
       from = msg.from.first_name;
-
+  var chat_id;
+  if ( msg.chat.id == -1001106567058)
+    chat_id = -1001143833889;
+  else
+    chat_id = msg.chat.id;
   var query = "INSERT INTO requests (chat_id, user_id, req, from_name) VALUES ("
-    + msg.chat.id + ", "
+    + chat_id + ", "
     + msg.from.id + ", '"
     + req + "', '"
     + from + "')";
@@ -173,11 +177,9 @@ bot.onText(/^\/delreq (\d+)/i, function(msg) {
 });
 
 bot.onText(/^getreq/i, function(msg) {
-  var chatId = msg.chat.id + "";
-  if (chatId == "-1001106567058")
-    chatId = chatId + "' OR chat_id = '-238473876";
-  else if (chatId == "-238473876")
-    chatId = chatId + "' OR chat_id = '-1001106567058";
+  var chatId = msg.chat.id;
+  if (chatId == -1001106567058)
+    chatId = -1001143833889;
   var query = "SELECT id, req, from_name FROM requests WHERE chat_id = '" + chatId + "' ORDER BY id";
   pool.query(query, function(err, result) {
     if (result && result.rows) {
