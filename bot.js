@@ -118,7 +118,7 @@ bot.onText(/^\/newreq (.+)/, function(msg) {
 
   // No need to tag the person who made the request
   if (msg.from.username)
-    from = msg.from.username;
+    from = "@" + msg.from.username;
   else
     if (msg.from.last_name)
       from = msg.from.first_name + " " + msg.from.last_name;
