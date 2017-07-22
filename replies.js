@@ -31,7 +31,14 @@ module.exports = {
     'no_username':        'Sorry.\nYou need to set an username from Telegram\'s settings before using me.',
     'error':              'Sorry.\nSomething went wrong.',
     'flooding':           'Too many requests! Try again in a few minutes.',
-    'kick':               'Please remove yourself from this group, because I\'m too polite to do it myself.',
+    //'kick':               'Please remove yourself from this group, because I\'m too polite to do it myself.',
+    'kick1':              'git rebase -i (some SHA)'
+                          + '\n(Drop all commits with "',
+    'kick2':              '" in them, save)'
+                          + '\necho "',
+    'kick3':              ' was never here" >> .log'
+                          + '\ngit commit -m "',
+    'kick4':              '"\ngit push --force origin master',
     'no_kick_permissions':'No. You should leave instead.',
     'owner_wrong_kick':   'Uhh...',
 }

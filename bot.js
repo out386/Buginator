@@ -2,13 +2,14 @@ var token = process.env.TOKEN;
 
 var Bot = require('node-telegram-bot-api');
 var bot;
-var google = require('google')
+var google = require('google');
 const translate = require('google-translate-api');
 const pool = require('./db');
 const fs = require('fs');
-var replies = require('./replies.js')
-var util = require('util')
-var AntiFlood = require('./antiflood.js')
+var replies = require('./replies.js');
+var util = require('util');
+var AntiFlood = require('./antiflood.js');
+var request = require('request');
 
 google.resultsPerPage = 10
 
@@ -83,6 +84,7 @@ bot.onText(/^\/kick/, (msg) => {
   if (msg.reply_to_message) {
     var reply;
     var reply_msg_id;
+    var from;
 
     if (msg.reply_to_message.from.id == process.env.OWNER || msg.reply_to_message.from.id == process.env.THIS_BOT) {
       if (msg.from.id == process.env.OWNER)
@@ -90,12 +92,29 @@ bot.onText(/^\/kick/, (msg) => {
       else
         reply = replies.no_kick_permissions;
       reply_msg_id = msg.message_id;
+      bot.sendMessage(msg.chat.id, reply, {reply_to_message_id: reply_msg_id});
+    } else {
+      if (msg.reply_to_message.from.last_name)
+        from = msg.reply_to_message.from.first_name + " " + msg.reply_to_message.from.last_name;
+      else
+        from = msg.reply_to_message.from.first_name;
+
+      request('http://whatthecommit.com/index.txt', function (error, response, body) {
+        body = body.split('\n')[0];
+        reply = "`" + replies.kick1;
+        reply = reply + from;
+        reply = reply + replies.kick2;
+        reply = reply + from;
+        reply = reply + replies.kick3;
+        reply = reply + body;
+        reply = reply + replies.kick4 + "`";
+        reply_msg_id = msg.reply_to_message.message_id;
+        bot.sendMessage(msg.chat.id, reply, {
+                                              reply_to_message_id: reply_msg_id,
+                                              parse_mode: "Markdown"
+                                            });
+      });
     }
-    else {
-      reply = replies.kick;
-      reply_msg_id = msg.reply_to_message.message_id;
-    }
-    bot.sendMessage(msg.chat.id, reply, {reply_to_message_id: reply_msg_id});
   }
 });
 
