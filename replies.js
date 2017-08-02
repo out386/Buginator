@@ -37,6 +37,7 @@ module.exports = {
     'kick2':              '" in them, save)'
                           + '\necho "',
     'kick3':              ' was never here" >> .log'
+                          + '\ngit add .log'
                           + '\ngit commit -m "',
     'kick4':              '"\ngit push --force origin master',
     'no_kick_permissions':'No. You should leave instead.',
