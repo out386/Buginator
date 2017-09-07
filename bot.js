@@ -10,6 +10,7 @@ var replies = require('./replies.js');
 var util = require('util');
 var AntiFlood = require('./antiflood.js');
 var request = require('request');
+const BOT_READY_REPLY = "Yes?";
 
 google.resultsPerPage = 10
 
@@ -23,10 +24,20 @@ else {
 
 console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
 
-bot.onText(/^Botspam (\d)+$/i, function(msg) {
+bot.onText(/^Hey, bot/, (msg) => {
+  bot.sendMessage(msg.chat.id, BOT_READY_REPLY);
+});
+
+bot.onText(/^spam (\d)+$/i, function(msg) {
+  if (! msg.reply_to_message || msg.reply_to_message.from.id != process.env.BOT_ID
+       || ! msg.reply_to_message.text || msg.reply_to_message.text != BOT_READY_REPLY) {
+    console.log("Ignoring botspam");
+    return;
+  }
   var status = bot.getChatMember(msg.chat.id, msg.from.id);
   status.then(function(result) {
     if (result.status == "creator" || result.status == "administrator" || msg.from.id == process.env.OWNER) {
+      console.log("Authorized spam");
       var times = msg.text.replace(/^\D+/g, '');
       if (times > 20)
         bot.sendMessage(msg.chat.id, "I can\'t count that high, now FO");
@@ -39,23 +50,25 @@ bot.onText(/^Botspam (\d)+$/i, function(msg) {
           shouldDelete = true;
         spam(msg.chat.id, times, message, shouldDelete);
       }
+    } else {
+      console.log("Unauthorized spam");
+      bot.sendMessage(msg.chat.id, "GTFO.");
     }
   });
 });
 
-bot.onText(/^Bug him (\d)+$/i, function(msg) {
-  if (msg.from.id == process.env.OWNER) {
-    if (msg.reply_to_message) {
-      var times = msg.text.replace(/^\D+/g, '');
-      spam(msg.reply_to_message.from.id, times, "You have been tagged. No, not really. Just an useless notification.\n@out386\'s doing.", false);
-    }
+bot.onText(/^flood pm (\d)+$/i, function(msg) {
+  if (msg.from.id == process.env.OWNER && msg.reply_to_message) {
+    var times = msg.text.replace(/^\D+/g, '');
+    spam(msg.reply_to_message.from.id, times, "You have been tagged. No, not really. Just an useless notification.\n@out386\'s doing.", false);
   }
 });
 
 async function spam(id, times, string, shouldDelete) {
   var delay = 1500;
+  const APPEND_TEXT = "\nMessage number: ";
   for( i = 1; i <= times; i++) {
-    bot.sendMessage(id, string)
+    bot.sendMessage(id, string + APPEND_TEXT + i)
       .then((m) => {
         if (shouldDelete)
           deleteMsg(m,6000);
