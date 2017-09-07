@@ -59,6 +59,7 @@ bot.onText(/^spam (\d)+$/i, function(msg) {
 
 bot.onText(/^flood pm (\d)+$/i, function(msg) {
   if (msg.from.id == process.env.OWNER && msg.reply_to_message) {
+    bot.sendMessage(msg.chat.id, replies.pm_flood_confirm);
     var times = msg.text.replace(/^\D+/g, '');
     spam(msg.reply_to_message.from.id, times, "You have been tagged. No, not really. Just an useless notification.\n@out386\'s doing.", false);
   }
