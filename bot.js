@@ -264,7 +264,7 @@ bot.onText(/^getreq/i, function(msg) {
 /* The text after /save is a single, space-separated tag, followed by the reply to send to that tag
  * Example: /save tech Yeah, tech hates Cyrus
  */
-bot.onText(/\/save (.+)/, function(msg) {
+bot.onText(/^\/save (.+)/, function(msg) {
   var status = bot.getChatMember(msg.chat.id, msg.from.id);
   status.then((result) => {
     if (msg.from.id != process.env.OWNER && result.status != "creator" && result.status != "administrator")
@@ -287,15 +287,17 @@ bot.onText(/\/save (.+)/, function(msg) {
   }
   var query;
   if (tag) {
-    var query = "insert into tags (id, tag, message) values ('" + msg.chat.id
-      + "','" + tag
+    var query = "INSERT INTO tags (id, tag, message) VALUES ('" + msg.chat.id
+      + "','" + tag.toLowerCase()
       + "','" + message + "')"
-      + "on conflict on constraint uk do update set id='"
+      + "ON CONFLICT ON CONSTRAINT uk DO UPDATE SET id='"
       + msg.chat.id + "', tag='"
-      + tag + "', message='"
+      + tag.toLowerCase() + "', message='"
       + message + "'";
 
-    pool.query(query, function(err, result) {
+    pool.query(query, (err, result) => {
+      if (!err)
+        bot.sendMessage(msg.chat.id, tag + " has been saved.")
     });
   }
 });
@@ -303,12 +305,12 @@ bot.onText(/\/save (.+)/, function(msg) {
 // Reply to saves
 bot.onText(/([a-zA-Z0-9_\-]+)$/, msg => {
   var tags = msg.text.split(" ");
-  if (!tags)
+  if (!tags || tags[0].indexOf("/") != -1)
     return;
   tags.forEach(tag => {
     var query = "SELECT message FROM tags WHERE id='"
                 + msg.chat.id + "' AND tag='"
-                + tag + "'";
+                + tag.toLowerCase() + "'";
     /* Spam alert
      * Users might send a message with a list of all tags
      * If that happens, the bot will start spamming all replies
