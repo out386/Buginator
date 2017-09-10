@@ -264,7 +264,7 @@ bot.onText(/^getreq/i, function(msg) {
 /* The text after /save is a single, space-separated tag, followed by the reply to send to that tag
  * Example: /save tech Yeah, tech hates Cyrus
  */
-bot.onText(/^\/save (.+)/, msg => {
+bot.onText(/^(\/save (.+))/, msg => {
   var status = bot.getChatMember(msg.chat.id, msg.from.id);
   status.then((result) => {
     if (msg.from.id != process.env.OWNER && result.status != "creator" && result.status != "administrator") {
@@ -293,7 +293,7 @@ bot.onText(/^\/save (.+)/, msg => {
           + msg.chat.id + "', tag='"
           + tag.toLowerCase() + "', message='"
           + message + "'";
-    
+
         pool.query(query, (err, result) => {
           if (!err)
             bot.sendMessage(msg.chat.id, tag + " has been saved.")
@@ -338,7 +338,7 @@ bot.onText(/^\/delsave (.+)/, msg => {
 });
 
 // Reply to saves
-bot.onText(/([a-zA-Z0-9_\-]+)$/, msg => {
+bot.onText(/([a-zA-Z0-9_\-]+)/, msg => {
   var tags = msg.text.split(" ");
   if (!tags || tags[0].indexOf("/") != -1)
     return;
