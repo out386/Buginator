@@ -267,9 +267,10 @@ bot.onText(/^getreq/i, function(msg) {
 bot.onText(/^(\/save (.+))/, msg => {
   var status = bot.getChatMember(msg.chat.id, msg.from.id);
   status.then((result) => {
-    if (msg.from.id != process.env.OWNER && result.status != "creator" && result.status != "administrator") {
+    if (msg.from.id != process.env.OWNER && result.status != "creator"
+      && result.status != "administrator" && msg.chat.id != "-1001084558708") {
       bot.sendMessage(msg.chat.id, "Make me.", {
-        reply_to_message_id: reply_msg_id
+        reply_to_message_id: msg.reply_to_message.id
       });
     } else {
       var text = msg.text;
