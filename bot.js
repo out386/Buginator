@@ -321,24 +321,25 @@ bot.onText(/([a-zA-Z0-9_\-]+)$/, msg => {
   });
 });
 
-bot.onText(/^allsaves/i, function(msg) {
+bot.onText(/^allsaves/i, msg => {
   var query = "SELECT tag FROM tags WHERE id='" + msg.chat.id + "'";
-  pool.query(query, function(err, result) {
-    if (result && result.rows) {
-      var items = "Send tag to see the associated message\nSaves for this group:\n";
-      var item;
-      result.rows.forEach(function(item) {
-        if (item.tag) {
-          items = items + "#" + item.tag + "\n";
-        }
-      });
-      if (items) {
-        bot.sendMessage(msg.chat.id, items)
-          .then((m) => {
-            deleteMsg(m, 15000);
-          });
-      }
+  //console.log("allsaves req for: " + msg.chat.id + " query: " + query);
+  pool.query(query, (err, result) => {
+    if (err) {
+      //console.log("Error in allsaves: " + err);
+      return;
     }
+    if (result && result.rows) {
+      var items = "Send save tag to see the associated message\nSaves for this group:\n";
+      result.rows.forEach(item => {
+        items = items + item.tag + "\n";
+      });
+      bot.sendMessage(msg.chat.id, items)
+        .then((m) => {
+          deleteMsg(m, 15000);
+        });
+    } //else
+      //console.log("Allsaves result/rows empty");
   });
 });
 
