@@ -264,42 +264,77 @@ bot.onText(/^getreq/i, function(msg) {
 /* The text after /save is a single, space-separated tag, followed by the reply to send to that tag
  * Example: /save tech Yeah, tech hates Cyrus
  */
-bot.onText(/^\/save (.+)/, function(msg) {
+bot.onText(/^\/save (.+)/, msg => {
   var status = bot.getChatMember(msg.chat.id, msg.from.id);
   status.then((result) => {
-    if (msg.from.id != process.env.OWNER && result.status != "creator" && result.status != "administrator")
-      return;
+    if (msg.from.id != process.env.OWNER && result.status != "creator" && result.status != "administrator") {
+      bot.sendMessage(msg.chat.id, "Make me.", {
+        reply_to_message_id: reply_msg_id
+      });
+    } else {
+      var text = msg.text;
+      var tagStartIndex = text.indexOf(" ");
+      var tagEndIndex;
+      var tag;
+      var message;
+      if (tagStartIndex > -1)
+        tagEndIndex = text.indexOf(" ", tagStartIndex + 1);
+      if (tagEndIndex > -1) {
+        tag = text.slice(tagStartIndex + 1, tagEndIndex);
+        message = text.slice(tagEndIndex + 1);
+        // console.log(msg.chat.id + ": #" + tag + " = " + message + "\n");
+      }
+      var query;
+      if (tag) {
+        var query = "INSERT INTO tags (id, tag, message) VALUES ('" + msg.chat.id
+          + "','" + tag.toLowerCase()
+          + "','" + message + "')"
+          + "ON CONFLICT ON CONSTRAINT uk DO UPDATE SET id='"
+          + msg.chat.id + "', tag='"
+          + tag.toLowerCase() + "', message='"
+          + message + "'";
+    
+        pool.query(query, (err, result) => {
+          if (!err)
+            bot.sendMessage(msg.chat.id, tag + " has been saved.")
+        });
+      }
+    }
   }, (err) => {
     console.log("save broke: " + err);
   });
+});
 
-  var text = msg.text;
-  var tagStartIndex = text.indexOf(" ");
-  var tagEndIndex;
-  var tag;
-  var message;
-  if (tagStartIndex > -1)
-    tagEndIndex = text.indexOf(" ", tagStartIndex + 1);
-  if (tagEndIndex > -1) {
-    tag = text.slice(tagStartIndex + 1, tagEndIndex);
-    message = text.slice(tagEndIndex + 1);
-    // console.log(msg.chat.id + ": #" + tag + " = " + message + "\n");
-  }
-  var query;
-  if (tag) {
-    var query = "INSERT INTO tags (id, tag, message) VALUES ('" + msg.chat.id
-      + "','" + tag.toLowerCase()
-      + "','" + message + "')"
-      + "ON CONFLICT ON CONSTRAINT uk DO UPDATE SET id='"
-      + msg.chat.id + "', tag='"
-      + tag.toLowerCase() + "', message='"
-      + message + "'";
+bot.onText(/^\/delsave (.+)/, msg => {
+  bot.getChatMember(msg.chat.id, msg.from.id)
+  .then((result) => {
+    if (msg.from.id != process.env.OWNER && result.status != "creator" && result.status != "administrator") {
+      bot.sendMessage(msg.chat.id, "Make me.", {
+        reply_to_message_id: reply_msg_id
+      });
+    } else {
+      var text = msg.text;
+      var tagStartIndex = text.indexOf(" ");
+      var tag;
+      if (tagStartIndex > -1)
+        tag = text.slice(tagStartIndex + 1);
 
-    pool.query(query, (err, result) => {
-      if (!err)
-        bot.sendMessage(msg.chat.id, tag + " has been saved.")
-    });
-  }
+      var query;
+      if (tag) {
+        var query = "DELETE FROM tags WHERE  id = '"
+          + msg.chat.id
+          + "' AND tag = '"
+          + tag.toLowerCase()
+          + "'";
+        pool.query(query, (err, result) => {
+          if (!err)
+            bot.sendMessage(msg.chat.id, tag + " has been deleted.")
+        });
+      }
+    }
+  }, (err) => {
+    console.log("delsave broke: " + err);
+  });
 });
 
 // Reply to saves
@@ -323,7 +358,7 @@ bot.onText(/([a-zA-Z0-9_\-]+)$/, msg => {
   });
 });
 
-bot.onText(/^allsaves/i, msg => {
+bot.onText(/^\/allsaves/i, msg => {
   var query = "SELECT tag FROM tags WHERE id='" + msg.chat.id + "'";
   //console.log("allsaves req for: " + msg.chat.id + " query: " + query);
   pool.query(query, (err, result) => {
