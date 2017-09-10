@@ -166,6 +166,7 @@ bot.onText(/^\/deletemsg/, (msg) => {
     }
   });
 });
+
 bot.onText(/^\/newreq (.+)/, function(msg) {
   var req = msg.text.slice(msg.text.indexOf(" ") +1);
   req = req.replace(/'/g, "''");
@@ -261,6 +262,14 @@ bot.onText(/^getreq/i, function(msg) {
 });
 
 bot.onText(/\/save (.+)/, function(msg) {
+  var status = bot.getChatMember(msg.chat.id, msg.from.id);
+  status.then((result) => {
+    if (msg.from.id != process.env.OWNER && result.status != "creator" && result.status != "administrator")
+      return;
+  }, (err) => {
+    console.log("save broke: " + err);
+  });
+  
   var text = msg.text;
   var tagStartIndex = text.indexOf("#");
   var tagEndIndex;
