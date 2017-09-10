@@ -283,7 +283,7 @@ bot.onText(/\/save (.+)/, function(msg) {
   if (tagEndIndex > -1) {
     tag = text.slice(tagStartIndex + 1, tagEndIndex);
     message = text.slice(tagEndIndex + 1);
-    console.log(msg.chat.id + ": #" + tag + " = " + message + "\n");
+    // console.log(msg.chat.id + ": #" + tag + " = " + message + "\n");
   }
   var query;
   if (tag) {
@@ -344,7 +344,7 @@ bot.onText(/^allsaves/i, function(msg) {
 
 bot.onText(/\/google (.+)/, function (msg) {
   var name = msg.from.first_name;
-  var message = msg.text;
+  var message = msg.text.slice(msg.text.indexOf(" ") + 1);
 
   google(message, function (err, res){
     if (err) console.error(err)
