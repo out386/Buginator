@@ -261,6 +261,9 @@ bot.onText(/^getreq/i, function(msg) {
   });
 });
 
+/* The text after /save is a single, space-separated tag, followed by the reply to send to that tag
+ * Example: /save tech Yeah, tech hates Cyrus
+ */
 bot.onText(/\/save (.+)/, function(msg) {
   var status = bot.getChatMember(msg.chat.id, msg.from.id);
   status.then((result) => {
@@ -269,17 +272,17 @@ bot.onText(/\/save (.+)/, function(msg) {
   }, (err) => {
     console.log("save broke: " + err);
   });
-  
+
   var text = msg.text;
-  var tagStartIndex = text.indexOf("#");
+  var tagStartIndex = text.indexOf(" ");
   var tagEndIndex;
   var tag;
   var message;
   if (tagStartIndex > -1)
-    tagEndIndex = text.indexOf(" ", tagStartIndex);
+    tagEndIndex = text.indexOf(" ", tagStartIndex + 1);
   if (tagEndIndex > -1) {
     tag = text.slice(tagStartIndex + 1, tagEndIndex);
-    message = text.slice(tagEndIndex+1);
+    message = text.slice(tagEndIndex + 1);
     console.log(msg.chat.id + ": #" + tag + " = " + message + "\n");
   }
   var query;
@@ -297,25 +300,32 @@ bot.onText(/\/save (.+)/, function(msg) {
   }
 });
 
-bot.onText(/^#([a-zA-Z0-9_\-]+)$/, function(msg) {
-  var tag = msg.text.slice(msg.text.indexOf("#") + 1);
-  if (tag) {
+// Reply to saves
+bot.onText(/([a-zA-Z0-9_\-]+)$/, msg => {
+  var tags = msg.text.split(" ");
+  if (!tags)
+    return;
+  tags.forEach(tag => {
     var query = "SELECT message FROM tags WHERE id='"
-        + msg.chat.id + "' AND tag='"
-        + tag + "'";
-    pool.query(query, function(err, result) {
-      if (result && result.rows && result.rows[0] && result.rows[0].message) {
+                + msg.chat.id + "' AND tag='"
+                + tag + "'";
+    /* Spam alert
+     * Users might send a message with a list of all tags
+     * If that happens, the bot will start spamming all replies
+     * No, IDK how to multithread in JS, going to go sleep, k bye
+     */
+    pool.query(query, (err, result) => {
+      if (result && result.rows && result.rows[0] && result.rows[0].message)
         bot.sendMessage(msg.chat.id, result.rows[0].message);
-      }
     });
-  }
+  });
 });
 
-bot.onText(/^alltags/i, function(msg) {
+bot.onText(/^allsaves/i, function(msg) {
   var query = "SELECT tag FROM tags WHERE id='" + msg.chat.id + "'";
   pool.query(query, function(err, result) {
     if (result && result.rows) {
-      var items = "Send tag to see the associated message\nTags for this group:\n";
+      var items = "Send tag to see the associated message\nSaves for this group:\n";
       var item;
       result.rows.forEach(function(item) {
         if (item.tag) {
