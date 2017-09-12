@@ -270,7 +270,7 @@ bot.onText(/^(\/save (.+))/, msg => {
     if (msg.from.id != process.env.OWNER && result.status != "creator"
       && result.status != "administrator" && msg.chat.id != "-1001084558708") {
       bot.sendMessage(msg.chat.id, "Make me.", {
-        reply_to_message_id: msg.reply_to_message.id
+        reply_to_message_id: msg.message_id
       });
     } else {
       var text = msg.text;
@@ -311,7 +311,7 @@ bot.onText(/^\/delsave (.+)/, msg => {
   .then((result) => {
     if (msg.from.id != process.env.OWNER && result.status != "creator" && result.status != "administrator") {
       bot.sendMessage(msg.chat.id, "Make me.", {
-        reply_to_message_id: reply_msg_id
+        reply_to_message_id: msg.message_id
       });
     } else {
       var text = msg.text;
@@ -329,7 +329,10 @@ bot.onText(/^\/delsave (.+)/, msg => {
           + "'";
         pool.query(query, (err, result) => {
           if (!err)
-            bot.sendMessage(msg.chat.id, tag + " has been deleted.")
+            bot.sendMessage(msg.chat.id, tag + " has been deleted.",
+              {
+                reply_to_message_id: msg.message_id
+              });
         });
       }
     }
@@ -354,7 +357,10 @@ bot.onText(/([a-zA-Z0-9_\-]+)/, msg => {
      */
     pool.query(query, (err, result) => {
       if (result && result.rows && result.rows[0] && result.rows[0].message)
-        bot.sendMessage(msg.chat.id, result.rows[0].message);
+        bot.sendMessage(msg.chat.id, result.rows[0].message,
+          {
+            reply_to_message_id: msg.message_id
+          });
     });
   });
 });
