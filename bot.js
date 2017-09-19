@@ -282,6 +282,8 @@ bot.onText(/^(\/save (.+))/, msg => {
         tagEndIndex = text.indexOf(" ", tagStartIndex + 1);
       if (tagEndIndex > -1) {
         tag = text.slice(tagStartIndex + 1, tagEndIndex);
+        if (tag.toLowerCase() == "rita" || tag.toLowerCase() == "ritayan")
+          return;
         message = text.slice(tagEndIndex + 1);
         // console.log(msg.chat.id + ": #" + tag + " = " + message + "\n");
       }
@@ -347,6 +349,8 @@ bot.onText(/([a-zA-Z0-9_\-]+)/, msg => {
   if (!tags || tags[0].indexOf("/") != -1)
     return;
   tags.forEach(tag => {
+    if (tag.toLowerCase() == "rita" || tag.toLowerCase() == "ritayan")
+      return;
     var query = "SELECT message FROM tags WHERE id='"
                 + msg.chat.id + "' AND tag='"
                 + tag.toLowerCase() + "'";
