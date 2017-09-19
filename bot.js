@@ -450,10 +450,15 @@ bot.on('inline_query', function(msg) {
     else if(/t (.+)/.test(message)) {
       message = message.replace(/t /, '');
       translate(message, {to: 'en'}).then(res => {
+        console.log(message);
         var result = {"type": "article",
                       "id": "1",
                       "title": "Translated to English",
-                      "input_message_content": {"message_text": res.text},
+                      "input_message_content": {
+                          "message_text": "<b>" + message + "</b>"
+                               + "<code> translated to English:</code>\n" + res.text,
+                          "parse_mode" : "HTML"
+                      },
                       "description": res.text};
         var results = [];
         results.push(result);

@@ -3,7 +3,7 @@ A Telegram bot with some random features. Most commands do not require a leading
   
 Inline functions:  
 @BigBug_bot g (query) : Perform an inline/interactive Google Search.  
-@BigBug_bot t (text) : Translate text to english (currently broken).  
+@BigBug_bot t (text) : Translate text to english.  
   
   
 Misc:  
@@ -12,10 +12,12 @@ pizzaplz : Why?
   
   
 Group tag management:  
-/save #(tag) message : Save a message  
-#(tag) : show the saved message.  
+/save tag message : Save a message (admins only)  
+tag : show the saved message.  
 alltags : List all tags in the current group.   
-  
+/deltag tag : Delete tag (Admins only)  
+
+
 Request management:  
 
 Stores the provided message in a list.  
