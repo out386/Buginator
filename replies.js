@@ -1,15 +1,12 @@
 module.exports = {
     'add_to_group':       'Add the bot to a group!',
     'start_group':        'Send a private message for more info to enable alerts.',
-    'start_private':      'Hello.\n' +
-                          '<b>You are now enabled</b> to receive notifications, ' +
-                          'Just add @BigBug_Bot in your groups.\n' +
-                          'When you\'ll get tagged you\'ll get a message.\n\n' +
-                          'Source code and info for @TagAlertBot: http://tagalert.pitasi.space/\n\n' +
-                          ' - @TagAlertBot is a bot by @Zaphodias. This bot contains code copied from it for the tag alert funtionality.\n' +
-                          'The rest of the features were added hurridly by @out386, after an unhealthy amount of Googling, because he still <b>DOESN\'T GET JS!</b>\n.'+
-                          'Send /help for other features. The unreadably dirty source is at https://github.com/out386/Buginator/\n' +
-                          'Written hastily on top of https://github.com/volodymyrlut/heroku-node-telegram-bot and https://github.com/yagop/node-telegram-bot-api',
+    'start_private':      'You will receive tag notifications, if @smallBug_bot is in your groups.\n\n' +
+                                   'Source code and info for @TagAlertBot: http://tagalert.pitasi.space/\n\n' +
+                                   ' - This bot contains code copied from @TagAlertBot for the tag alert funtionality. ' +
+                                   'The rest of the features were added hurridly by @out386.\n' +
+                                   'See the README in the source for other features, at https://github.com/out386/Buginator/\n' +
+                                   'Written hastily on top of https://github.com/volodymyrlut/heroku-node-telegram-bot and https://github.com/yagop/node-telegram-bot-api',
     'main_text':          '<b>[ Incoming Message ]</b>\n\n' +
                           '<b>[ FROM ]</b>\n' +
                           '\uD83D\uDC64' +
