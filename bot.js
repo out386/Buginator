@@ -265,10 +265,12 @@ bot.onText(/^getreq/i, function(msg) {
  * Example: /save tech Yeah, tech hates Cyrus
  */
 bot.onText(/^(\/save (.+))/, msg => {
+  if (msg.chat.id == "-1001084558708")
+    return;
   var status = bot.getChatMember(msg.chat.id, msg.from.id);
   status.then((result) => {
     if (msg.from.id != process.env.OWNER && result.status != "creator"
-      && result.status != "administrator" && msg.chat.id != "-1001084558708") {
+      && result.status != "administrator") {
       bot.sendMessage(msg.chat.id, "Make me.", {
         reply_to_message_id: msg.message_id
       });
@@ -345,6 +347,8 @@ bot.onText(/^\/delsave (.+)/, msg => {
 
 // Reply to saves
 bot.onText(/([a-zA-Z0-9_\-]+)/, msg => {
+  if (msg.chat.id == "-1001084558708")
+    return;
   var tags = msg.text.split(" ");
   if (!tags || tags[0].indexOf("/") != -1)
     return;
