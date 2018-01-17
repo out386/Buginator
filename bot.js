@@ -24,7 +24,7 @@ else {
 
 console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
 
-bot.onText(/^Hey, bot/, (msg) => {
+bot.onText(/^Hey, bot$/, (msg) => {
   bot.sendMessage(msg.chat.id, BOT_READY_REPLY);
 });
 
@@ -117,7 +117,7 @@ bot.onText(/^\/pizzaplz/, function(msg) {
   bot.sendMessage(msg.chat.id, "Go make your own pizza");
 });
 
-bot.onText(/^\/kick/, (msg) => {
+bot.onText(/^\/boot/, (msg) => {
   if (msg.reply_to_message) {
     var reply;
     var reply_msg_id;
