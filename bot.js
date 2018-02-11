@@ -364,11 +364,17 @@ bot.onText(/([a-zA-Z0-9_\-]+)/, msg => {
      * No, IDK how to multithread in JS, going to go sleep, k bye
      */
     pool.query(query, (err, result) => {
-      if (result && result.rows && result.rows[0] && result.rows[0].message)
+      if (result && result.rows && result.rows[0] && result.rows[0].message) {
+        var replyId;
+        if (msg.reply_to_message && msg.reply_to_message.from.id != process.env.BOT_ID)
+          replyId = msg.reply_to_message.message_id;
+        else
+          replyId = msg.message_id;
         bot.sendMessage(msg.chat.id, result.rows[0].message,
           {
-            reply_to_message_id: msg.message_id
+            reply_to_message_id: replyId
           });
+      }
     });
   });
 });
