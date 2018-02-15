@@ -155,6 +155,25 @@ bot.onText(/^\/boot/, (msg) => {
   }
 });
 
+
+bot.onText(/^\/id$/i, (msg) => {
+  var type;
+  var reply;
+  if (msg.chat.type == "private") {
+    type = "chat";
+    reply = replies.private_id_text;
+  } else {
+    if (msg.chat.type == "supergroup")
+      type = "group";
+    reply = replies.id_text1 + type + replies.id_text2;
+  }
+  reply = reply + msg.chat.id + "`.";
+  bot.sendMessage(msg.chat.id, reply, {
+                                        reply_to_message_id: msg.message_id,
+                                        parse_mode: "Markdown"
+                                      });
+});
+
 bot.onText(/^\/deletemsg/, (msg) => {
   var status = bot.getChatMember(msg.chat.id, msg.from.id);
   status.then(function(result){
