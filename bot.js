@@ -186,6 +186,38 @@ bot.onText(/^\/deletemsg/, (msg) => {
   });
 });
 
+bot.onText(/^s\/(.+)/i, (msg) => {
+  if (!msg.reply_to_message || !msg.text)
+    return;
+  var message = msg.text.substring(2);  // As 0 and 1 are "s/"
+  var o_index = findMessageIndex(message, 0);
+  if (o_index == -1)
+    return;
+  var n_index = findMessageIndex(message, o_index + 1);
+  if (n_index == -1)
+    return;
+  var o_text = message.substring(0, o_index);
+  var n_text = message.substring(o_index + 1, n_index);
+  n_text =  n_text.replace(/\\/g, "");  // Yeah, can't use real backslashes in the replace string. :evil_smile:
+  var regexp = new RegExp(o_text, "g");
+  var new_text = msg.reply_to_message.text.replace(regexp, n_text);
+  bot.sendMessage(msg.chat.id, new_text, {reply_to_message_id: msg.reply_to_message.message_id})
+
+});
+
+function findMessageIndex(msg, index) {
+  while (true) {
+    if (index >= msg.length)
+      break;
+    var t_index = msg.indexOf('/', index);
+    if (t_index > -1 && (t_index == 0 || msg.charAt(t_index - 1)!='\\'))
+      return t_index;
+    else
+      index++;
+  }
+  return -1;
+}
+
 bot.onText(/^\/newreq (.+)/, function(msg) {
   var req = msg.text.slice(msg.text.indexOf(" ") +1);
   req = req.replace(/'/g, "''");
