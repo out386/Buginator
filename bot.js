@@ -199,7 +199,12 @@ bot.onText(/^s\/(.+)/i, (msg) => {
   var o_text = message.substring(0, o_index);
   var n_text = message.substring(o_index + 1, n_index);
   n_text =  n_text.replace(/\\/g, "");  // Yeah, can't use real backslashes in the replace string. :evil_smile:
-  var regexp = new RegExp(o_text, "g");
+  var regexp;
+  try {
+    regexp = new RegExp(o_text, "g");
+  } catch(e) {
+    return;
+  }
   var new_text = msg.reply_to_message.text.replace(regexp, n_text);
   bot.sendMessage(msg.chat.id, new_text, {reply_to_message_id: msg.reply_to_message.message_id})
 
