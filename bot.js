@@ -168,7 +168,7 @@ bot.onText(/^\/deletemsg/, (msg) => {
 });
 
 bot.onText(/^s\/(.+)/i, (msg) => {
-  if (!msg.reply_to_message || !msg.text)
+  if (!msg.reply_to_message || !msg.reply_to_message.text || !msg.text)
     return;
   var message = msg.text.substring(2);  // As 0 and 1 are "s/"
   var o_index = findMessageIndex(message, 0);
@@ -302,7 +302,7 @@ bot.onText(/^getreq/i, function(msg) {
  * Example: /save tech Yeah, tech hates Cyrus
  */
 bot.onText(/^(\/save (.+))/, msg => {
-  if (msg.chat.id == "-1001084558708")
+  if (msg.chat.id == process.env.NOSAVE_CHAT_ID && msg.from.id != process.env.OWNER)
     return;
   var status = bot.getChatMember(msg.chat.id, msg.from.id);
   status.then((result) => {
@@ -384,8 +384,6 @@ bot.onText(/^\/delsave (.+)/, msg => {
 
 // Reply to saves
 bot.onText(/([a-zA-Z0-9_\-]+)/, msg => {
-  if (msg.chat.id == "-1001084558708")
-    return;
   var tags = msg.text.split(" ");
   if (!tags || tags[0].indexOf("/") != -1)
     return;
