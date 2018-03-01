@@ -43,12 +43,7 @@ bot.onText(/^spam (\d)+$/i, function(msg) {
         bot.sendMessage(msg.chat.id, "I can\'t count that high, now FO");
       else {
         var message = "Total messages to send: " + times + "\nStarted by: @" + msg.from.username;
-        var shouldDelete;
-        if (msg.from.id == process.env.OWNER)
-          shouldDelete = false;
-        else
-          shouldDelete = true;
-        spam(msg.chat.id, times, message, shouldDelete, msg);
+        spam(msg.chat.id, times, message, msg);
       }
     } else {
       console.log("Unauthorized spam");
@@ -70,32 +65,18 @@ bot.onText(/^flood pm([a-zA-Z\s]?)+ (\d)+$/i, function(msg) {
       message = "@out386 says :\n" + messageInText.slice(0, lastSpace);
     else
       message = "You have been tagged. No, not really. Just an useless notification.\n@out386\'s doing.";
-    spam(msg.reply_to_message.from.id, times, message, false, msg);
+    spam(msg.reply_to_message.from.id, times, message, msg);
   } else
       bot.sendMessage(msg.chat.id, "Uh... No.");
 });
 
-async function spam(id, times, string, shouldDelete, originalMessage) {
+async function spam(id, times, string, originalMessage) {
   var delay = 1500;
   const APPEND_TEXT = "\nMessage number: ";
   var firstCheck = true;
   for( i = 1; i <= times; i++) {
     bot.sendMessage(id, string + APPEND_TEXT + i)
-      .then((m) => {
-        if (shouldDelete)
-          deleteMsg(m,6000);
-        else if (firstCheck) {
-          // Assuming if !shouldDelete, then function was called from Bug me.
-          firstCheck = false;
-          bot.sendMessage(originalMessage.chat.id, "Target acquired: " + originalMessage.reply_to_message.from.first_name);
-        }
-      })
       .catch((err) => {
-        if (!shouldDelete && firstCheck) {
-          firstCheck = false;
-          // TO-DO: check the contents of err and stop assuming too much
-          bot.sendMessage(originalMessage.chat.id, "Target didn\'t start the bot");
-        }
       });
     await sleep(delay);
   }
