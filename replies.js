@@ -40,5 +40,6 @@ module.exports = {
     'owner_wrong_kick':   'Uhh...',
     'id_text1':           'The ID of this ',
     'id_text2':           ' is `',
-    'private_id_text':    'Your ID is `'
+    'private_id_text':    'Your ID is `',
+    'leaving_chat':	  '@out386 did not add this group to the DB. Goodbye.'
 }

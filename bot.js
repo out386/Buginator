@@ -777,6 +777,7 @@ async function leave_check(msg) {
     pool.query(query, (err, result) => {
       // so many checks because I just want this to work, not gonna do it properly and read the docs
       if (err || !result || !result.rows || !result.rows[0]) {
+        bot.sendMessage(msg.chat.id, replies.leaving_chat);
         bot.leaveChat(msg.chat.id);
         var leftGroupName;
         if (msg.chat.title)
