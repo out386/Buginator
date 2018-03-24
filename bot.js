@@ -571,22 +571,6 @@ function sleep(ms) {
 
 var af = new AntiFlood()
 
-function removeGroup(groupId) {
-  var query = "DELETE FROM groups WHERE groupId=" + groupId;
-  pool.query(query, (err, result) => {
-    if (err) return
-    console.log("Removing group %s", groupId)
-  })
-}
-
-function removeUserFromGroup(userId, groupId) {
-  var query = "DELETE FROM groups WHERE userId=" + userId + " AND groupId=" + groupId;
-  pool.query(query, (err, result) => {
-    if (err) return
-    console.log("Removing @%s from group %s", userId, groupId)
-  })
-}
-
 function addUser(username, userId, chatId) {
   if (!username || !userId) return
 
@@ -602,9 +586,6 @@ function addUser(username, userId, chatId) {
       console.log("Added @%s (%s) to database", loweredUsername, userId)
   })
 
-  if (userId !== chatId)
-    query = "INSERT INTO groups VALUES (" + chatId + ", " + userId + ")";
-    pool.query(query, (err, result) => {})
 }
 
 function notifyUser(user, msg, silent) {
@@ -690,17 +671,7 @@ bot.onText(/^\/info$|^\/info@TagAlertBot$/gi, (msg) => {
 
 bot.on('message', (msg) => {
   addUser(msg.from.username, msg.from.id, msg.chat.id)
-
-  // A user left the chat
-  if (msg.left_chat_member) {
-    var userId = msg.left_chat_member.id
-    if (userId == bot.myId)
-      removeGroup(msg.chat.id)
-    else
-      removeUserFromGroup(userId, msg.chat.id)
-    return
-  }
-  else if (msg.new_chat_member)
+  if (msg.new_chat_member)
     // Checking if the bot got added to a chat
     //if (msg.chat.type != "private")
       leave_check(msg);
