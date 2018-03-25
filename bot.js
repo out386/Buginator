@@ -441,15 +441,22 @@ bot.onText(/\/google (.+)/, function (msg) {
   var message = msg.text.slice(msg.text.indexOf(" ") + 1);
 
   google(message, function (err, res){
-    if (err) console.error(err)
-    var link = res.links[0];
-    var title = link.title;
-    var url = link.href;
+    if (err) {
+      if (err.message.indexOf("Error on response (503)") > -1)
+        bot.sendMessage(msg.chat.id, "The search was blocked by Google");
+      else
+        console.error(err);
+    } else {
+      var link = res.links[0];
+      var title = link.title;
+      var url = link.href;
 
-    if (url == null) {
-      if (res.next) res.next()
-    } else
-    bot.sendMessage(msg.chat.id, title + "\n\n" + url);
+      if (url == null) {
+        if (res.next)
+          res.next();
+      } else
+        bot.sendMessage(msg.chat.id, title + "\n\n" + url);
+    }
   })
 });
 
