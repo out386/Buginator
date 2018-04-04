@@ -137,7 +137,7 @@ bot.onText(/^\/boot/, (msg) => {
 });
 
 
-bot.onText(/^\/id$/i, (msg) => {
+bot.onText(/^\/id/i, (msg) => {
   var type;
   var reply;
   if (msg.chat.type == "private") {
