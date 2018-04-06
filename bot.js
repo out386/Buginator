@@ -444,8 +444,11 @@ bot.onText(/\/google (.+)/, function (msg) {
     if (err) {
       if (err.message.indexOf("Error on response (503)") > -1)
         bot.sendMessage(msg.chat.id, "The search was blocked by Google");
-      else
+      else {
         console.error(err);
+        bot.sendMessage(msg.chat.id, "Unexpected error.");
+        return;
+      }
     } else {
       var link = res.links[0];
       var title = link.title;
