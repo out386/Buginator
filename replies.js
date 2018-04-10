@@ -38,5 +38,6 @@ module.exports = {
   'id_text1': 'The ID of this ',
   'id_text2': ' is `',
   'private_id_text': 'Your ID is `',
-  'leaving_chat': '@out386 did not add this group to the DB. Goodbye.'
+  'leaving_chat': '@out386 did not add this group to the DB. Goodbye.',
+  'failed_to_add_group': 'Could not add this group to whitelist.'
 };

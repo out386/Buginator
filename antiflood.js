@@ -1,3 +1,4 @@
+//   Author: Antonio Pitasi (@Zaphodias)
 function AntiFlood () {
   this.users = {};
 

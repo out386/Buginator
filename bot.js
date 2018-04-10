@@ -7,9 +7,9 @@ const translate = require('google-translate-api');
 const pool = require('./db');
 const fs = require('fs');
 var replies = require('./replies.js');
-var util = require('util');
-var AntiFlood = require('./antiflood.js');
 var request = require('request');
+var tools = require('./tools');
+var tagAlert = require('./tag');
 const BOT_READY_REPLY = 'Yes?';
 
 google.resultsPerPage = 10;
@@ -28,19 +28,20 @@ bot.onText(/^Hey, bot$/, (msg) => {
 });
 
 bot.onText(/^spam (\d)+$/i, function (msg) {
-  if (!msg.reply_to_message || msg.reply_to_message.from.id != process.env.BOT_ID ||
-       !msg.reply_to_message.text || msg.reply_to_message.text != BOT_READY_REPLY) {
+  if (!msg.reply_to_message || msg.reply_to_message.from.id !== process.env.BOT_ID ||
+       !msg.reply_to_message.text || msg.reply_to_message.text !== BOT_READY_REPLY) {
     console.log('Ignoring botspam');
     return;
   }
   var status = bot.getChatMember(msg.chat.id, msg.from.id);
   status.then(function (result) {
-    if (result.status == 'creator' || result.status == 'administrator' || msg.from.id == process.env.OWNER) {
+    if (result.status === 'creator' || result.status === 'administrator' ||
+        msg.from.id === process.env.OWNER) {
       console.log('Authorized spam');
       var times = msg.text.replace(/^\D+/g, '');
-      if (times > 20)
-        {bot.sendMessage(msg.chat.id, "I can\'t count that high, now FO");}
-      else {
+      if (times > 20) {
+        bot.sendMessage(msg.chat.id, "I can't count that high, now FO");
+      } else {
         var message = 'Total messages to send: ' + times + '\nStarted by: @' + msg.from.username;
         spam(msg.chat.id, times, message, msg);
       }
@@ -52,7 +53,7 @@ bot.onText(/^spam (\d)+$/i, function (msg) {
 });
 
 bot.onText(/^flood pm([a-zA-Z\s]?)+ (\d)+$/i, function (msg) {
-  if (msg.from.id == process.env.OWNER && msg.reply_to_message) {
+  if (msg.from.id === process.env.OWNER && msg.reply_to_message) {
     var message;
     var lastSpace = msg.text.lastIndexOf(' ');
     var times = msg.text.slice(lastSpace + 1);
@@ -60,90 +61,100 @@ bot.onText(/^flood pm([a-zA-Z\s]?)+ (\d)+$/i, function (msg) {
     messageInText = messageInText.slice(messageInText.indexOf(' ') + 1);
     lastSpace = messageInText.lastIndexOf(' ');
 
-    if (lastSpace > -1)
-      {message = "@out386 says :\n" + messageInText.slice(0, lastSpace);}
-    else
-      {message = "You have been tagged. No, not really. Just an useless notification.\n@out386\'s doing.";}
+    if (lastSpace > -1) {
+      message = '@out386 says :\n' + messageInText.slice(0, lastSpace);
+    } else {
+      message = "You have been tagged. No, not really. Just an useless notification.\n@out386's doing.";
+    }
     spam(msg.reply_to_message.from.id, times, message, msg);
-  } else
-    {bot.sendMessage(msg.chat.id, "Uh... No.");}
+  } else { bot.sendMessage(msg.chat.id, 'Uh... No.'); }
 });
 
 async function spam (id, times, string, originalMessage) {
   var delay = 1500;
   const APPEND_TEXT = '\nMessage number: ';
-  var firstCheck = true;
-  for (i = 1; i <= times; i++) {
+  for (var i = 1; i <= times; i++) {
     bot.sendMessage(id, string + APPEND_TEXT + i)
       .catch((err) => {
+        console.log(err);
       });
-    await sleep(delay);
+    await tools.sleep(delay);
   }
 }
+
 bot.onText(/^\/pun/i, function (msg) {
   fs.readFile('./puns.txt', function (err, data) {
-    if (err)
-      {return;}
+    if (err) { return; }
     var lines = data.toString('utf8').split('\n');
     bot.sendMessage(msg.chat.id, lines[Math.floor(Math.random() * lines.length)]);
   });
 });
 
-bot.onText(/^KmeStop/, function (msg) {
-  bot.sendMessage(msg.chat.id, 'Not gonna happen, man.');
-});
-
-bot.onText(/^\/pizzaplz/, function (msg) {
-  bot.sendMessage(msg.chat.id, 'Go make your own pizza');
-});
-
 bot.onText(/^\/boot/, (msg) => {
   if (msg.reply_to_message) {
-    var reply;
-    var reply_msg_id;
+    var replyMsgId;
     var from;
 
-    if (msg.reply_to_message.from.id == process.env.OWNER || msg.reply_to_message.from.id == process.env.BOT_ID) {
-      if (msg.from.id == process.env.OWNER)
-        {reply = replies.owner_wrong_kick;}
-      else
-        {reply = replies.no_kick_permissions;}
-      reply_msg_id = msg.message_id;
-      bot.sendMessage(msg.chat.id, reply, {reply_to_message_id: reply_msg_id});
-    } else {
-      if (msg.reply_to_message.from.last_name)
-        {from = msg.reply_to_message.from.first_name + " " + msg.reply_to_message.from.last_name;}
-      else
-        {from = msg.reply_to_message.from.first_name;}
-
-      request('http://whatthecommit.com/index.txt', function (error, response, body) {
-        body = body.split('\n')[0];
-        reply = '`' + replies.kick1;
-        reply = reply + from;
-        reply = reply + replies.kick2;
-        reply = reply + from;
-        reply = reply + replies.kick3;
-        reply = reply + body;
-        reply = reply + replies.kick4 + '`';
-        reply_msg_id = msg.reply_to_message.message_id;
-        bot.sendMessage(msg.chat.id, reply, {
-          reply_to_message_id: reply_msg_id,
-          parse_mode: 'Markdown'
+    if (msg.reply_to_message.from.id === process.env.OWNER ||
+        msg.reply_to_message.from.id === process.env.BOT_ID) {
+      var reply;
+      if (msg.from.id === process.env.OWNER) {
+        reply = replies.owner_wrong_kick;
+      } else {
+        reply = replies.no_kick_permissions;
+      }
+      replyMsgId = msg.message_id;
+      bot.sendMessage(msg.chat.id, reply,
+        {
+          reply_to_message_id: replyMsgId
         });
+    } else {
+      if (msg.reply_to_message.from.last_name) {
+        from = msg.reply_to_message.from.first_name +
+          ' ' + msg.reply_to_message.from.last_name;
+      } else {
+        from = msg.reply_to_message.from.first_name;
+      }
+
+      request('http://whatthecommit.com/index.txt', (error, response, body) => {
+        if (error) {
+          console.log(error);
+          return;
+        }
+        var reply = generateKickReply(from, body);
+        replyMsgId = msg.reply_to_message.message_id;
+        bot.sendMessage(msg.chat.id, reply,
+          {
+            reply_to_message_id: replyMsgId,
+            parse_mode: 'Markdown'
+          });
       });
     }
   }
 });
 
+function generateKickReply (from, body) {
+  body = body.split('\n')[0];
+  var reply = '`' + replies.kick1;
+  reply = reply + from;
+  reply = reply + replies.kick2;
+  reply = reply + from;
+  reply = reply + replies.kick3;
+  reply = reply + body;
+  reply = reply + replies.kick4 + '`';
+  return reply;
+}
+
 bot.onText(/^\/id/i, (msg) => {
   var type;
   var reply;
-  if (msg.chat.type == 'private') {
+  if (msg.chat.type === 'private') {
     type = 'chat';
     reply = replies.private_id_text;
   } else {
-    if (msg.chat.type == 'supergroup')
-      {type = "group";}
+    if (msg.chat.type === 'supergroup') {
+      type = 'group';
+    }
     reply = replies.id_text1 + type + replies.id_text2;
   }
   reply = reply + msg.chat.id + '`.';
@@ -153,75 +164,83 @@ bot.onText(/^\/id/i, (msg) => {
   });
 });
 
-bot.onText(/^\/deletemsg/, (msg) => {
-  var status = bot.getChatMember(msg.chat.id, msg.from.id);
-  status.then(function (result) {
-    if ((result.status == 'creator' || result.status == 'administrator' || msg.from.id == process.env.OWNER) && msg.reply_to_message) {
-      bot.deleteMessage(msg.reply_to_message.message_id, msg.chat.id)
-        .then(() => {}, () => {});
-      bot.deleteMessage(msg.message_id, msg.chat.id)
-        .then(() => {}, () => {});
-    }
-  });
+bot.onText(/^\/deletemsg$/, (msg) => {
+  if (msg.from.id === process.env.OWNER && msg.reply_to_message) {
+    deleteMessageCommand(msg);
+  } else {
+    var status = bot.getChatMember(msg.chat.id, msg.from.id);
+    status.then(function (result) {
+      if ((result.status === 'creator' || result.status === 'administrator') &&
+          msg.reply_to_message) {
+        deleteMessageCommand(msg);
+      }
+    });
+  }
 });
 
+function deleteMessageCommand (msg) {
+  bot.deleteMessage(msg.reply_to_message.message_id, msg.chat.id);
+  bot.deleteMessage(msg.message_id, msg.chat.id);
+}
+
+// For string substituition
 bot.onText(/^s\/(.+)/i, (msg) => {
-  if (!msg.reply_to_message || !msg.reply_to_message.text || !msg.text)
-    {return;}
+  if (!msg.reply_to_message || !msg.reply_to_message.text || !msg.text) { return; }
   var message = msg.text.substring(2); // As 0 and 1 are "s/"
-  var o_index = findMessageIndex(message, 0);
-  if (o_index == -1)
-    {return;}
-  var n_index = findMessageIndex(message, o_index + 1);
-  if (n_index == -1)
-    {return;}
-  var o_text = message.substring(0, o_index);
-  var n_text = message.substring(o_index + 1, n_index);
-  n_text = n_text.replace(/\\/g, ''); // Yeah, can't use real backslashes in the replace string. :evil_smile:
+  var regexIndex = findMessageIndex(message, 0);
+  if (regexIndex === -1) {
+    return;
+  }
+  var replaceIndex = findMessageIndex(message, regexIndex + 1);
+  if (replaceIndex === -1) {
+    return;
+  }
+  var regexText = message.substring(0, regexIndex);
+  var replaceText = message.substring(regexIndex + 1, replaceIndex);
+  replaceText = replaceText.replace(/\\/g, ''); // Yeah, can't use real backslashes in the replace string. :evil_smile:
   var regexp;
   try {
-    regexp = new RegExp(o_text, 'g');
+    regexp = new RegExp(regexText, 'g');
   } catch (e) {
     return;
   }
-  var new_text = msg.reply_to_message.text.replace(regexp, n_text);
-  bot.sendMessage(msg.chat.id, new_text, {reply_to_message_id: msg.reply_to_message.message_id});
+  var newText = msg.reply_to_message.text.replace(regexp, replaceText);
+  bot.sendMessage(msg.chat.id, newText, {reply_to_message_id: msg.reply_to_message.message_id});
 });
 
 function findMessageIndex (msg, index) {
   while (true) {
-    if (index >= msg.length)
-      {break;}
-    var t_index = msg.indexOf('/', index);
-    if (t_index > -1 && (t_index == 0 || msg.charAt(t_index - 1) != '\\'))
-      {return t_index;}
-    else
-      {index++;}
+    if (index >= msg.length) {
+      break;
+    }
+    var tempIndex = msg.indexOf('/', index);
+    if (tempIndex > -1 && (tempIndex === 0 || msg.charAt(tempIndex - 1) !== '\\')) {
+      return tempIndex;
+    } else {
+      index++;
+    }
   }
   return -1;
 }
 
-bot.onText(/^\/newreq (.+)/, function (msg) {
-  var req = msg.text.slice(msg.text.indexOf(' ') + 1);
+bot.onText(/^\/newReq (.+)/i, function (msg) {
+  var text = msg.text.trim();
+  var req = text
+    .slice(text.indexOf(' ') + 1);
   req = req.replace(/'/g, "''");
-  console.log(req);
   var from;
 
-  // No need to tag the person who made the request
-  if (msg.from.username)
-    {from = "@" + msg.from.username;}
-  else
-  if (msg.from.last_name)
-    {from = msg.from.first_name + " " + msg.from.last_name;}
-  else
-    {from = msg.from.first_name;}
-  var chat_id;
-  if (msg.chat.id == -1001106567058)
-    {chat_id = -1001143833889;}
-  else
-    {chat_id = msg.chat.id;}
+  if (msg.from.username) {
+    from = '@' + msg.from.username;
+  } else {
+    from = msg.from.first_name;
+    if (msg.from.last_name) {
+      from = from + ' ' + msg.from.last_name;
+    }
+  }
+  var chatId = msg.chat.id;
   var query = 'INSERT INTO requests (chat_id, user_id, req, from_name) VALUES (' +
-    chat_id + ', ' +
+    chatId + ', ' +
     msg.from.id + ", '" +
     req + "', '" +
     from + "')";
@@ -230,102 +249,116 @@ bot.onText(/^\/newreq (.+)/, function (msg) {
     if (!err) {
       bot.sendMessage(msg.chat.id, '"' + req + '" was added.', {reply_to_message_id: msg.message_id})
         .then((m) => {
-          deleteMsg(m, 15000);
+          tools.deleteMsg(bot, m, 15000);
         });
-      deleteMsg(msg, 3000);
+      tools.deleteMsg(bot, msg, 3000);
     }
   });
 });
 
-bot.onText(/^\/delreq (\d+)/i, function (msg) {
+bot.onText(/^\/delReq (\d+)/i, function (msg) {
   var id = Number(msg.text.slice(msg.text.indexOf(' ')));
   if (id) {
     var query = 'SELECT * FROM requests WHERE chat_id = ' + msg.chat.id + ' AND id = ' + id;
     pool.query(query, function (err, result) {
+      if (err) {
+        bot.sendMessage(msg.chat.id, 'Could not delete.', {reply_to_message_id: msg.message_id});
+        return;
+      }
       if (result && result.rows && result.rows[0]) {
-        var req_user_id = result.rows[0].user_id;
+        var reqUserId = result.rows[0].user_id;
         var req = result.rows[0].req;
-        var status = bot.getChatMember(msg.chat.id, msg.from.id);
-        status.then(function (result) {
-          if (msg.from.id == process.env.OWNER || req_user_id == msg.from.id || result.status == 'creator' || result.status == 'administrator') {
-            var delete_query = 'DELETE FROM requests WHERE id = ' + id + 'AND chat_id = ' + msg.chat.id;
-            pool.query(delete_query, function (err, result) {
-              if (!err) {
-                bot.sendMessage(msg.chat.id, '#' + id + ', "' + req + '", was deleted. ', {reply_to_message_id: msg.message_id})
-                  .then((m) => {
-                    deleteMsg(m, 15000);
-                  });
-                deleteMsg(msg, 3000);
-              }
-            });
-          }
-        }, function (err) {
-          console.log('getchatmemberbroke');
-        });
+        if (msg.from.id === process.env.OWNER || msg.from.id === reqUserId) {
+          deleteReq(id, msg, req);
+        } else {
+          var status = bot.getChatMember(msg.chat.id, msg.from.id);
+          status.then(function (result) {
+            if (result.status === 'creator' || result.status === 'administrator') {
+              deleteReq(id, msg, req);
+            }
+          }, function (err) {
+            bot.sendMessage(msg.chat.id, 'Could not delete.', {reply_to_message_id: msg.message_id});
+            console.log('getchatmemberbroke' + err);
+          });
+        }
       }
     });
   }
 });
 
-bot.onText(/^getreq/i, function (msg) {
+function deleteReq (id, msg, req) {
+  var deleteQuery = 'DELETE FROM requests WHERE id = ' + id + 'AND chat_id = ' + msg.chat.id;
+  pool.query(deleteQuery, function (err, result) {
+    if (!err) {
+      bot.sendMessage(msg.chat.id, '#' + id + ', "' + req + '", was deleted. ',
+        {
+          reply_to_message_id: msg.message_id
+        }
+      ).then((m) => {
+        tools.deleteMsg(bot, m, 15000);
+      });
+      tools.deleteMsg(bot, msg, 3000);
+    }
+  });
+}
+
+bot.onText(/^\/allReqs/i, function (msg) {
   var chatId = msg.chat.id;
-  if (chatId == -1001106567058)
-    {chatId = -1001143833889;}
   var query = "SELECT id, req, from_name FROM requests WHERE chat_id = '" + chatId + "' ORDER BY id";
-  pool.query(query, function (err, result) {
-    if (result && result.rows) {
+  pool.query(query, (err, result) => {
+    if (err) {
+      return;
+    }
+    var deleteDelay = 60000;
+    if (result && result.rows && result.rows[0]) {
       var items = 'Requests for this group:\n\n\n';
-      var item;
-      var deleteDelay = 60000;
-      result.rows.forEach(function (item) {
-        if (item.id && item.req && item.from_name)
-          {items = items + "#" + item.id + "    " + item.req + "  ->   by  ->  " + item.from_name + "\n\n";}
+      result.rows.forEach((item) => {
+        if (item.id && item.req && item.from_name) { items = items + '#' + item.id + '    ' + item.req + '  ->   by  ->  ' + item.from_name + '\n\n'; }
       });
       if (items) {
-        deleteMsg(msg, 3000);
+        tools.deleteMsg(bot, msg, 3000);
         bot.sendMessage(msg.chat.id, items)
           .then((m) => {
-            deleteMsg(m, deleteDelay);
+            tools.deleteMsg(bot, m, deleteDelay);
           });
-        if (msg.from.id != process.env.OWNER)
-          {bot.sendMessage(msg.from.id, items)
-            .catch(err => {});}
       }
+    } else {
+      bot.sendMessage(msg.chat.id, 'There are no requests for this group.')
+        .then((m) => {
+          tools.deleteMsg(bot, m, deleteDelay);
+        });
     }
   });
 });
 
 /* The text after /save is a single, space-separated tag, followed by the reply to send to that tag
- * Example: /save tech Yeah, tech hates Cyrus
+ * Example: /save tech Yeah, tech hates awesomeironman
  */
-bot.onText(/^(\/save (.+))/, msg => {
-  if (msg.chat.id == process.env.NOSAVE_CHAT_ID && msg.from.id != process.env.OWNER)
-    {return;}
+bot.onText(/^(\/newTag (.+))/i, msg => {
+  if (msg.chat.id === process.env.NOSAVE_CHAT_ID && msg.from.id !== process.env.OWNER) {
+    return;
+  }
   var status = bot.getChatMember(msg.chat.id, msg.from.id);
   status.then((result) => {
-    if (msg.from.id != process.env.OWNER && result.status != 'creator' &&
-      result.status != 'administrator') {
+    if (msg.from.id !== process.env.OWNER &&
+      result.status !== 'creator' &&
+      result.status !== 'administrator') {
       bot.sendMessage(msg.chat.id, 'Make me.', {
         reply_to_message_id: msg.message_id
       });
     } else {
-      var text = msg.text;
-      var tagStartIndex = text.indexOf(' ');
-      var tagEndIndex;
+      var text = msg.text.trim();
+      var tagStartIndex = text.indexOf(' '); // Will be > -1 because the regex in onText guarantees that
       var tag;
       var message;
-      if (tagStartIndex > -1)
-        {tagEndIndex = text.indexOf(" ", tagStartIndex + 1);}
-      if (tagEndIndex > -1) {
-        tag = text.slice(tagStartIndex + 1, tagEndIndex);
-        if (tag.toLowerCase() == 'rita' || tag.toLowerCase() == 'ritayan')
-          {return;}
-        message = text.slice(tagEndIndex + 1);
-        // console.log(msg.chat.id + ": #" + tag + " = " + message + "\n");
+      var tagEndIndex = text.indexOf(' ', tagStartIndex + 1);
+      if (tagEndIndex <= -1) {
+        return;
       }
-      var query;
-      if (tag) {
-        var query = "INSERT INTO tags (id, tag, message) VALUES ('" + msg.chat.id +
+      tag = text.slice(tagStartIndex + 1, tagEndIndex);
+      text = text + ' ';
+      message = text.slice(tagEndIndex + 1);
+      var query = "INSERT INTO tags (id, tag, message) VALUES ('" + msg.chat.id +
           "','" + tag.toLowerCase() +
           "','" + message + "')" +
           "ON CONFLICT ON CONSTRAINT uk DO UPDATE SET id='" +
@@ -333,75 +366,78 @@ bot.onText(/^(\/save (.+))/, msg => {
           tag.toLowerCase() + "', message='" +
           message + "'";
 
-        pool.query(query, (err, result) => {
-          if (!err)
-            {bot.sendMessage(msg.chat.id, tag + " has been saved.")};
-        });
-      }
+      pool.query(query, (err, result) => {
+        if (!err) {
+          bot.sendMessage(msg.chat.id, tag + ' has been saved.');
+        }
+      });
     }
   }, (err) => {
+    bot.sendMessage(msg.chat.id, 'Could not save.');
     console.log('save broke: ' + err);
   });
 });
 
-bot.onText(/^\/delsave (.+)/, msg => {
+bot.onText(/^\/delTag (.+)/i, msg => {
   bot.getChatMember(msg.chat.id, msg.from.id)
     .then((result) => {
-      if (msg.from.id != process.env.OWNER && result.status != 'creator' && result.status != 'administrator') {
+      if (msg.from.id !== process.env.OWNER &&
+        result.status !== 'creator' &&
+        result.status !== 'administrator') {
         bot.sendMessage(msg.chat.id, 'Make me.', {
           reply_to_message_id: msg.message_id
         });
       } else {
-        var text = msg.text;
+        var text = msg.text.trim();
         var tagStartIndex = text.indexOf(' ');
-        var tag;
-        if (tagStartIndex > -1)
-          {tag = text.slice(tagStartIndex + 1);}
-
-        var query;
-        if (tag) {
-          var query = "DELETE FROM tags WHERE  id = '" +
+        if (tagStartIndex <= -1) {
+          return;
+        }
+        var tag = text.slice(tagStartIndex + 1);
+        var query = "DELETE FROM tags WHERE  id = '" +
           msg.chat.id +
           "' AND tag = '" +
           tag.toLowerCase() +
           "'";
-          pool.query(query, (err, result) => {
-            if (!err)
-              {bot.sendMessage(msg.chat.id, tag + " has been deleted.",
+        pool.query(query, (err, result) => {
+          if (!err) {
+            bot.sendMessage(msg.chat.id, tag + ' has been deleted.',
               {
                 reply_to_message_id: msg.message_id
-              });}
-          });
-        }
+              });
+          }
+        });
       }
     }, (err) => {
-      console.log('delsave broke: ' + err);
+      bot.sendMessage(msg.chat.id, 'Could not delete.');
+      console.log('delTag broke: ' + err);
     });
 });
 
-// Reply to saves
-bot.onText(/([a-zA-Z0-9_\-]+)/, msg => {
+// Reply to tags
+function replyToTag (msg) {
   var tags = msg.text.split(' ');
-  if (!tags || tags[0].indexOf('/') != -1)
-    {return;}
+  if (!tags || tags[0].indexOf('/') !== -1) {
+    return;
+  }
   tags.forEach(tag => {
-    if (tag.toLowerCase() == 'rita' || tag.toLowerCase() == 'ritayan')
-      {return;}
     var query = "SELECT message FROM tags WHERE id='" +
                 msg.chat.id + "' AND tag='" +
                 tag.toLowerCase() + "'";
-    /* Spam alert
-     * Users might send a message with a list of all tags
-     * If that happens, the bot will start spamming all replies
-     * No, IDK how to multithread in JS, going to go sleep, k bye
-     */
+    // Spam alert
+    // Users might send a message with a list of all tags
     pool.query(query, (err, result) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
       if (result && result.rows && result.rows[0] && result.rows[0].message) {
         var replyId;
-        if (msg.reply_to_message && msg.reply_to_message.from.id != process.env.BOT_ID)
-          {replyId = msg.reply_to_message.message_id;}
-        else
-          {replyId = msg.message_id;}
+        if (msg.reply_to_message && msg.reply_to_message.from.id !== process.env.BOT_ID) {
+          replyId = msg.reply_to_message.message_id;
+        } else {
+          replyId = msg.message_id;
+        }
         bot.sendMessage(msg.chat.id, result.rows[0].message,
           {
             reply_to_message_id: replyId
@@ -409,42 +445,39 @@ bot.onText(/([a-zA-Z0-9_\-]+)/, msg => {
       }
     });
   });
-});
+}
 
-bot.onText(/^\/allsaves/i, msg => {
+bot.onText(/^\/allTags$/i, msg => {
   var query = "SELECT tag FROM tags WHERE id='" + msg.chat.id + "'";
-  // console.log("allsaves req for: " + msg.chat.id + " query: " + query);
   pool.query(query, (err, result) => {
     if (err) {
-      // console.log("Error in allsaves: " + err);
       return;
     }
     if (result && result.rows) {
-      var items = 'Send save tag to see the associated message\nSaves for this group:\n';
+      var items = 'Send a tag to see the associated message\nTags for this group:\n';
       result.rows.forEach(item => {
         items = items + item.tag + '\n';
       });
       bot.sendMessage(msg.chat.id, items)
         .then((m) => {
-          deleteMsg(m, 15000);
+          tools.deleteMsg(bot, m, 15000);
         });
-    } // else
-    // console.log("Allsaves result/rows empty");
+    } else {
+      bot.sendMessage(msg.chat.id, 'No tags for this chat.');
+    }
   });
 });
 
 bot.onText(/\/google (.+)/, function (msg) {
-  var name = msg.from.first_name;
   var message = msg.text.slice(msg.text.indexOf(' ') + 1);
 
-  google(message, function (err, res){
+  google(message, function (err, res) {
     if (err) {
-      if (err.message.indexOf("Error on response (503)") > -1)
-        bot.sendMessage(msg.chat.id, "The search was blocked by Google");
-      else {
+      if (err.message.indexOf('Error on response (503)') > -1) {
+        bot.sendMessage(msg.chat.id, 'The search was blocked by Google');
+      } else {
         console.error(err);
-        bot.sendMessage(msg.chat.id, "Unexpected error.");
-        
+        bot.sendMessage(msg.chat.id, 'Unexpected error.');
       }
     } else {
       var link = res.links[0];
@@ -452,316 +485,209 @@ bot.onText(/\/google (.+)/, function (msg) {
       var url = link.href;
 
       if (url == null) {
-        if (res.next)
+        if (res.next) {
           res.next();
-      } else
-        bot.sendMessage(msg.chat.id, title + "\n\n" + url);
+        }
+      } else {
+        bot.sendMessage(msg.chat.id, title + '\n\n' + url);
+      }
     }
   });
 });
 
+function performInlineGoogle (message, id) {
+  message = message.replace(/g /, '');
+  google(message, function (err, res) {
+    if (err) {
+      if (err.indexOf('Error on response (503)') > -1) {
+        sendErrorReplyInline('This search was blocked by Google', id);
+        return;
+      } else {
+        sendErrorReplyInline('An error occurred', id);
+        console.error(err);
+        return;
+      }
+    }
+    var results = [];
+    for (var i = 0; i < res.links.length; ++i) {
+      var link = res.links[i];
+      var title = link.title;
+      var url = link.href;
+      if (url != null) {
+        var spliturl = url.split('/');
+        var thumbUrl = spliturl[0] + '//' + spliturl[2] + '/favicon.ico';
+
+        var result = {
+          'type': 'article',
+          'id': i + '',
+          'title': title,
+          'input_message_content':
+          {
+            'message_text': '<code>Google: Result for</code>   <b>"' + message + '" :</b>\n\n' + url,
+            'parse_mode': 'HTML'
+          },
+          'thumb_url': thumbUrl,
+          'hide_url': true,
+          'description': link.description
+        };
+        results.push(result);
+        bot.answerInlineQuery(id, results);
+      }
+    }
+  });
+}
+
+function performInlineTranslate (message, id) {
+  message = message.replace(/t /, '');
+  translate(message, { to: 'en' })
+    .then(res => {
+      var result = {
+        'type': 'article',
+        'id': '1',
+        'title': 'Translated to English',
+        'input_message_content':
+        {
+          'message_text': '<b>' + message + '</b>' + '<code> translated to English:</code>\n' + res.text,
+          'parse_mode': 'HTML'
+        },
+        'description': res.text
+      };
+      var results = [];
+      results.push(result);
+      bot.answerInlineQuery(id, results);
+    })
+    .catch(err => {
+      sendErrorReplyInline('An error occurred. Our code monkeys are NOT trying to fix your problem.', id);
+      console.error(err);
+    });
+}
+
 bot.on('inline_query', function (msg) {
-  var name = msg.from.first_name;
   var message = msg.query;
-  var user = msg.from.id;
-  var reses = [];
-  //  console.log("Got message! " + message + " from " + msg.id);
 
   if (message) {
     if (/g (.+)/.test(message)) {
-      message = message.replace(/g /, '');
-      //      console.log(message);
-      google(message, function (err, res) {
-        if (err) console.error(err);
-        var results = [];
-        for (var i = 0; i < res.links.length; ++i) {
-          var link = res.links[i];
-          // console.log(link);
-          var title = link.title;
-          var url = link.href;
-          if (url != null) {
-            var spliturl = url.split('/');
-            var baseurl = spliturl[0] + '//' + spliturl[2] + '/favicon.ico';
-
-            var result = {'type': 'article',
-              'id': i + '',
-              'title': title,
-              'input_message_content': {'message_text': '<code>Google: Result for</code>   <b>"' + message + '" :</b>\n\n' + url, 'parse_mode': 'HTML'},
-              'thumb_url': baseurl,
-              'hide_url': true,
-              'description': link.description};
-            results.push(result);
-            bot.answerInlineQuery(msg.id, results);
-          }
-        }
-      });
-      //            console.log(results);
+      performInlineGoogle(message, msg.id);
     } else if (/t (.+)/.test(message)) {
-      message = message.replace(/t /, '');
-      translate(message, {to: 'en'}).then(res => {
-        console.log(message);
-        var result = {'type': 'article',
-          'id': '1',
-          'title': 'Translated to English',
-          'input_message_content': {
-            'message_text': '<b>' + message + '</b>' +
-                               '<code> translated to English:</code>\n' + res.text,
-            'parse_mode': 'HTML'
-          },
-          'description': res.text};
-        var results = [];
-        results.push(result);
-        bot.answerInlineQuery(msg.id, results);
-      }).catch(err => {
-        console.error(err);
-      });
+      performInlineTranslate(message, msg.id);
     } else {
-      var results = [];
-      var result = {'type': 'article',
-        'id': 'oops',
-        'title': 'Invalid query',
-        'input_message_content': {'message_text': 'Invalid query.'},
-        'hide_url': true,
-        'description': 'Invalid command! Check the list of available commands.'};
-      results.push(result);
-      bot.answerInlineQuery(msg.id, results);
+      sendErrorReplyInline('Invalid command! Check the list of available commands.', msg.id);
     }
   } else {
-    var results = [];
-    var result = {'type': 'article',
-      'id': 'Googlen',
-      'title': 'Google',
-      'input_message_content': {'message_text': 'Type @BigBug_bot g (query) to search with Google'},
-      'thumb_url': 'https://google.com/favicon.ico',
-      'hide_url': true,
-      'description': 'Search for anything with Google Search\nTap "g" (without quotes) now to use.'};
-    results.push(result);
-
-    result = {'type': 'article',
-      'id': 'Translaten',
-      'title': 'Translate to english',
-      'input_message_content': {'message_text': 'Type @BigBug_bot t (text) to translate to english'},
-      'hide_url': true,
-      'description': 'Translate anything with Google Translate\nTap "t" (without quotes) now to use.'};
-    results.push(result);
-    bot.answerInlineQuery(msg.id, results);
+    sendHelpInline(msg.id);
   }
-//  console.log("here "+msg.id+" results are :"+results);
-});
-
-async function deleteMsg (msg, time) {
-  await sleep(time);
-  bot.deleteMessage(msg.message_id, msg.chat.id)
-    .catch(err => {});
-}
-function sleep (ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// ------------------------------------------------------------------------------------//
-//			TagAlertBot						      //
-// ------------------------------------------------------------------------------------//
-
-/****************************************************/
-//   TagAlertBot (https://telegram.me/tagalertbot)  //
-//   Simple notifications for mentions              //
-//                                                  //
-//   Author: Antonio Pitasi (@Zaphodias)            //
-//   2016 - made with love                          //
-/****************************************************/
-
-var af = new AntiFlood();
-
-function addUser (username, userId, chatId) {
-  if (!username || !userId) return;
-
-  var loweredUsername = username.toLowerCase();
-  var query = 'INSERT INTO users VALUES (' + userId + ", '" + loweredUsername + "')";
-  pool.query(query, (err, result) => {
-    if (err) {
-      // User already in db, updating him
-      query = "UPDATE users SET username='" + loweredUsername + "' WHERE id=" + userId;
-      pool.query(query, (err, result) => {});
-    } else
-      {console.log("Added @%s (%s) to database", loweredUsername, userId)};
-  });
-}
-
-function notifyUser (user, msg, silent) {
-  var notify = (userId) => {
-    bot.getChatMember(msg.chat.id, userId).then((res) => {
-      if (res.status == 'left' || res.status == 'kicked') return;
-      // User is inside in the group
-      var from = util.format('%s %s %s',
-        msg.from.first_name,
-        msg.from.last_name ? msg.from.last_name : '',
-        msg.from.username ? `(@${msg.from.username})` : ''
-      );
-      var btn = {inline_keyboard: [[{text: replies.retrieve}]]};
-      if (msg.chat.username)
-        {btn.inline_keyboard[0][0].url = `telegram.me/${msg.chat.username}/${msg.message_id}`};
-      else
-        {btn.inline_keyboard[0][0].callback_data = `/retrieve_${msg.message_id}_${-msg.chat.id}`};
-
-      if (msg.photo) {
-        var final_text = util.format(replies.main_caption, from, msg.chat.title, msg.caption);
-        var file_id = msg.photo[0].file_id;
-        bot.sendPhoto(userId, file_id, {caption: final_text, reply_markup: btn})
-          .then((m) => {}, () => {});
-      } else {
-        var final_text = util.format(replies.main_text, from, msg.chat.title, msg.text);
-        bot.sendMessage(userId,
-          final_text,
-          {parse_mode: 'HTML',
-            reply_markup: btn,
-			 disable_notification: silent})
-          .then((m) => {}, () => {});
-      }
-    });
-  };
-
-  if (user.substring) { // user is a string -> get id from db
-    var query = "SELECT id FROM users WHERE username='" + user.toLowerCase() + "'";
-    pool.query(query, (err, result) => {
-      if (!err && result && result.rows && result.rows[0] && result.rows[0].id) {
-        notify(result.rows[0].id);
-      }
-    });
-  }
-  // user is a number, already the id
-  else if (user.toFixed) notify(user);
-}
-
-bot.on('callback_query', (call) => {
-  if (!af.isFlooding(call.from.id)) {
-    var splitted = call.data.split('_');
-    if (splitted[0] === '/retrieve') {
-      var messageId = splitted[1];
-      var groupId = splitted[2];
-      bot.sendMessage(-parseInt(groupId),
-        util.format(replies.retrieve_group, call.from.username ? '@' + call.from.username:call.from.first_name),
-        {reply_to_message_id: parseInt(messageId)})
-        .then((m) => {
-          deleteMsg(m, 20000);
-        });
-      bot.answerCallbackQuery(call.id, replies.retrieve_success, true);
-    }
-  } else bot.answerCallbackQuery(call.id, replies.flooding, true);
-});
-
-bot.onText(/\/start/, (msg) => {
-  if (msg.chat.type !== 'private') return;
-
-  if (!af.isFlooding(msg.from.id)) {
-    bot.sendMessage(msg.chat.id, replies.start_private);
-  }
-});
-
-bot.onText(/^\/info$|^\/info@TagAlertBot$/gi, (msg) => {
-  if (!af.isFlooding(msg.from.id)) {
-    if (msg.chat.type !== 'private')
-      {bot.sendMessage(msg.chat.id, replies.start_group)};
-    else
-      {bot.sendMessage(msg.chat.id, replies.start_private, {parse_mode: 'HTML'})};
-  }
-});
-
-bot.on('message', (msg) => {
-  addUser(msg.from.username, msg.from.id, msg.chat.id);
-  if (msg.new_chat_member)
-    // Checking if the bot got added to a chat
-    // if (msg.chat.type != "private")
-    {leave_check(msg);}
-
-  if (
-    (msg.chat.type !== 'group' && msg.chat.type !== 'supergroup') ||
-      (msg.forward_from && msg.forward_from.id == bot.myId)
-  ) return;
-  var toBeNotified = new Set(); // avoid duplicate notifications if tagged twice
-
-  // Text messages
-  if (msg.text && msg.entities) {
-    // Extract (hash)tags from message text
-    var extract = (entity) => {
-      return msg.text
-        .substring(entity.offset + 1, entity.offset + entity.length)
-        .toLowerCase();
-    };
-
-    for (var i in msg.entities) {
-      var entity = msg.entities[i];
-
-      // Tags
-      if (entity.type === 'mention') {
-        var username = extract(entity);
-        toBeNotified.add(username);
-      }
-
-      // Users without username
-      else if (entity.user)
-        {notifyUser(entity.user.id, msg, false)};
-    }
-  }
-
-  // Images/media captions
-  else if (msg.caption) {
-    var matched = msg.caption.match(/@[a-z0-9]*/gi);
-    for (var i in matched) {
-      var username = matched[i].trim().substring(1).toLowerCase();
-      toBeNotified.add(username);
-    }
-  } else return;
-
-  // helpful to check if user is tagging himself
-  var isEqual = (u1, u2) => {
-    if (u1 && u2) return u1.toLowerCase() === u2.toLowerCase();
-    else return false;
-  };
-
-  // let's really send notifications
-  toBeNotified.forEach((username) => {
-    // check if user is tagging himself
-    if (!isEqual(msg.from.username, username)) {
-      notifyUser(username, msg, false);
-    }
-  });
 });
 
 bot.onText(/!addgroup/, (msg) => {
   if (msg.from) {
-    if (msg.from.id == process.env.OWNER) {
+    if (msg.from.id === process.env.OWNER) {
       var query = 'INSERT INTO authorized_chats VALUES (' + msg.chat.id + ')';
-      pool.query(query, (err, result) => {});
+      pool.query(query, (err, result) => {
+        if (err) {
+          bot.sendMessage(msg.chat.id, replies.failed_to_add_group);
+        }
+      });
     }
   }
 });
 
-async function leave_check (msg) {
-  if (msg.new_chat_member.id == process.env.BOT_ID) {
-    await sleep(20000); // Waiting for owner to send the add group command
+bot.onText(/^\/info/i, (msg) => {
+  tagAlert.onInfo(bot, msg);
+});
+
+bot.onText(/^\/start/i, (msg) => {
+  tagAlert.onStart(bot, msg);
+});
+
+bot.on('callback_query', (call) => {
+  tagAlert.onCallback(bot, call);
+});
+
+bot.on('message', (msg) => {
+  if (msg.new_chat_member) {
+    // Checking if the bot got added to a chat
+    leaveCheck(msg);
+  }
+  replyToTag(msg);
+  tagAlert.onMessage(bot, msg);
+});
+
+bot.deleteMessage = function (messageId, chatId, form = {}) {
+  form.chat_id = chatId;
+  form.message_id = messageId;
+  return this._request('deleteMessage', { form });
+};
+
+async function leaveCheck (msg) {
+  if (msg.new_chat_member.id === process.env.BOT_ID) {
+    await tools.sleep(20000); // Waiting for owner to send the add group command
     var query = "SELECT chat_id FROM authorized_chats WHERE chat_id='" + msg.chat.id + "'";
     pool.query(query, (err, result) => {
-      // so many checks because I just want this to work, not gonna do it properly and read the docs
       if (err || !result || !result.rows || !result.rows[0]) {
         bot.sendMessage(msg.chat.id, replies.leaving_chat);
         bot.leaveChat(msg.chat.id);
-        var leftGroupName;
-        if (msg.chat.title) {
-          leftGroupName = msg.chat.title;
-        }
-        else {
-          leftGroupName = msg.chat.id;
-        }
-        bot.sendMessage(process.env.OWNER, 'Just left ' + leftGroupName);
+        sendGroupLeftToOwner(msg);
       }
     });
   }
 }
 
-bot.deleteMessage = function (message_id, chat_id, form = {}) {
-  form.chat_id = chat_id;
-  form.message_id = message_id;
-  return this._request('deleteMessage', { form });
-};
+function sendGroupLeftToOwner (msg) {
+  var leftGroupName;
+  if (msg.chat.title) {
+    leftGroupName = msg.chat.title;
+  } else {
+    leftGroupName = msg.chat.id;
+  }
+  bot.sendMessage(process.env.OWNER, 'Just left ' + leftGroupName);
+}
+
+function sendErrorReplyInline (message, id) {
+  var results = [];
+  var result = {
+    'type': 'article',
+    'id': 'oops',
+    'title': 'Invalid query',
+    'input_message_content':
+      {
+        'message_text': 'Invalid query.'
+      },
+    'hide_url': true,
+    'description': message
+  };
+  results.push(result);
+  bot.answerInlineQuery(id, results);
+}
+
+function sendHelpInline (id) {
+  var results = [];
+  var result = {
+    'type': 'article',
+    'id': 'Googlen',
+    'title': 'Google',
+    'input_message_content':
+      {
+        'message_text': 'Type @BigBug_bot g (query) to search with Google'
+      },
+    'thumb_url': 'https://google.com/favicon.ico',
+    'hide_url': true,
+    'description': 'Search for anything with Google Search\nTap "g" (without quotes) now to use.'
+  };
+  results.push(result);
+
+  result = {
+    'type': 'article',
+    'id': 'Translaten',
+    'title': 'Translate to english',
+    'input_message_content':
+      {
+        'message_text': 'Type @BigBug_bot t (text) to translate to english'
+      },
+    'hide_url': true,
+    'description': 'Translate anything with Google Translate\nTap "t" (without quotes) now to use.'
+  };
+  results.push(result);
+  bot.answerInlineQuery(id, results);
+}
 
 module.exports = bot;

@@ -1,20 +1,15 @@
 # Buginator  
-A Telegram bot with some random features. Most commands do not require a leading "/", to minimize the chances of people tapping it repeatedly to spam (been there, done that).  
-  
+A Telegram bot with some random features. 
+
 Inline functions:  
 @BigBug_bot g (query) : Perform an inline/interactive Google Search.  
 @BigBug_bot t (text) : Translate text to english.  
   
   
-Misc:  
-KmeStop : No, I won't.  
-pizzaplz : Why?  
-  
-  
 Group tag management:  
-/save tag message : Save a message (admins only)  
+/newtag tag message : Save a message (admins only)  
 tag : show the saved message.  
-alltags : List all tags in the current group.   
+/alltags : List all tags in the current group.   
 /deltag tag : Delete tag (Admins only)  
 
 
@@ -22,13 +17,13 @@ Request management:
 
 Stores the provided message in a list.  
 /newreq (request) : make a new request.  
-getreq : show all requests for the group.  
-delreq (request id) : delete the request for the group (group admins and original requester only).  
+/getreq : show all requests for the group.  
+/delreq (request id) : delete the request for the group (group admins and original requester only). There's no validation before confirmation, so things like "/deltag The biggest idiot" will produce interesting results.  
 
 TagAlert:
   
-This bot also contains a copy of https://github.com/Pitasi/TagAlertBot. This was done because the original bot couldn't reliably disable the #everyone and #admin tags, until the developer of TagAlertBot fixes the problem.  
-This bot needs the "privacy" attribute to be set to "disabled" from Botfather.  
+This bot also contains a copy of https://github.com/Pitasi/TagAlertBot.  
+This bot needs the "privacy" attribute to be set to "disabled" and the inline attribute to be set to "enabled" from Botfather.  
 
 This bot was written using https://github.com/volodymyrlut/heroku-node-telegram-bot. The below are the hosting instructions/README from heroku-node-telegram-bot.  
 
@@ -40,18 +35,15 @@ Starter pack for running telegram bot on the Heroku using Node.js
 
 ###Try bot locally
 
-1. Create your own bot using Telegram's [BotFather](https://core.telegram.org/bots#3-how-do-i-create-a-bot) and grab your TOKEN.
+1. Create a new bot using Telegram's [BotFather](https://core.telegram.org/bots#3-how-do-i-create-a-bot) and grab your TOKEN.
 2. Clone or download and unpack this repo.
-3. Go to the app's folder using `cd ~/heroku-node-telegram-bot`
-4. Run `npm install` (in some cases you will need to run this with sudo, you know, just the permissions).
-5. Rename .env_example file into .env and set TOKEN to the value, you've got from the BotFather.
+3. Go to the app's folder using `cd ~/Buginator`
+4. Run `npm install` (in some cases you will need to run this with sudo).
+5. Rename .env_example file into .env and set TOKEN to the value you've got from the BotFather.
 5. Run `npm run set_env` to set the environment variables from the .env file.
-6. Run `npm start` and send smth to your bot.
-7. After it says "hello" to you, open your first bottle of beer :beer:
+6. Run `npm start`.
 
-Feel your awesomeness? :sunglasses:
-
-###Deploy your bot to the heroku
+###Deploy the bot to the heroku
 
 1. Create the [Heroku account](https://heroku.com) and install the [Heroku Toolbelt](https://toolbelt.heroku.com/).
 2. Login to your Heroku account using `heroku login`.
