@@ -1,0 +1,4 @@
+export DATABASE_URL=$(heroku config:get DATABASE_URL)
+alias hsql='heroku pg:psql'
+alias hlog='heroku logs --source app'
+alias hlogt='heroku logs -t --source app'
