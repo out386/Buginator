@@ -50,6 +50,24 @@ bot.onText(/^spam (\d)+$/i, function (msg) {
   });
 });
 
+bot.onText(/^\/restart$|^\/restart@smallBug_bot$/, (msg) => {
+  if (msg.from.id == process.env.OWNER) {
+    request.delete(
+      {
+        url: 'https://api.heroku.com/apps/' + process.env.APP_NAME_HEROKU + '/dynos/',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/vnd.heroku+json; version=3',
+          'Authorization': 'Bearer ' + process.env.API_TOKEN_HEROKU
+        }
+      }, (err, resp, body) => {
+        if (!err && resp && resp.statusCode === 202)
+          bot.sendMessage(msg.chat.id, "Restarting the bot");
+      }
+    );
+  }
+});
+
 bot.onText(/^flood pm([a-zA-Z\s]?)+ (\d)+$/i, function (msg) {
   if (msg.from.id == process.env.OWNER && msg.reply_to_message) {
     var message;
