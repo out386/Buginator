@@ -435,6 +435,8 @@ bot.onText(/^\/delTag (.+)/i, msg => {
               {
                 reply_to_message_id: msg.message_id
               });
+          } else {
+            console.log('deltag: ' + err);
           }
         });
       }
