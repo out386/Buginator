@@ -91,8 +91,7 @@ async function spam (id, times, string, originalMessage) {
   const APPEND_TEXT = '\nMessage number: ';
   for (var i = 1; i <= times; i++) {
     bot.sendMessage(id, string + APPEND_TEXT + i)
-      .catch((err) => {
-        console.log(err);
+      .catch((ignored) => {
       });
     await tools.sleep(delay);
   }
