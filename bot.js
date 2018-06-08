@@ -97,7 +97,7 @@ async function spam (id, times, string, originalMessage) {
   }
 }
 
-bot.onText(/^\/pun/i, function (msg) {
+bot.onText(/^\/pun$/i, function (msg) {
   fs.readFile('./puns.txt', function (err, data) {
     if (err) { return; }
     var lines = data.toString('utf8').split('\n');
@@ -105,7 +105,7 @@ bot.onText(/^\/pun/i, function (msg) {
   });
 });
 
-bot.onText(/^\/boot/, (msg) => {
+bot.onText(/^\/boot$/, (msg) => {
   if (msg.reply_to_message) {
     var replyMsgId;
     var from;
@@ -160,7 +160,7 @@ function generateKickReply (from, body) {
   return reply;
 }
 
-bot.onText(/^\/id/i, (msg) => {
+bot.onText(/^\/id$|^\/id@smallbug_bot$/i, (msg) => {
   var type;
   var reply;
   if (msg.chat.type === 'private') {
@@ -521,7 +521,7 @@ bot.onText(/^\/allTags$/i, msg => {
   });
 });
 
-bot.onText(/\/google (.+)/, function (msg) {
+bot.onText(/^\/google (.+)/, function (msg) {
   var message = msg.text.slice(msg.text.indexOf(' ') + 1);
 
   google(message, function (err, res) {
