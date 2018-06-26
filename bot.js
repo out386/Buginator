@@ -9,9 +9,6 @@ const fs = require('fs');
 var replies = require('./replies.js');
 var request = require('request');
 var tools = require('./tools');
-if (process.env.DATABASE_URL) {
-  var tagAlert = require('./tag');
-}
 
 google.resultsPerPage = 10;
 
@@ -647,24 +644,6 @@ bot.onText(/!addgroup/, (msg) => {
   }
 });
 
-bot.onText(/^\/info/i, (msg) => {
-  if (process.env.DATABASE_URL) {
-    tagAlert.onInfo(bot, msg);
-  }
-});
-
-bot.onText(/^\/start/i, (msg) => {
-  if (process.env.DATABASE_URL) {
-    tagAlert.onStart(bot, msg);
-  }
-});
-
-bot.on('callback_query', (call) => {
-  if (process.env.DATABASE_URL) {
-    tagAlert.onCallback(bot, call);
-  }
-});
-
 bot.on('message', (msg) => {
   if (process.env.DATABASE_URL) {
     if (msg.new_chat_member) {
@@ -672,7 +651,6 @@ bot.on('message', (msg) => {
       leaveCheck(msg);
     }
     replyToTag(msg);
-    tagAlert.onMessage(bot, msg);
   }
 });
 
