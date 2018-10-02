@@ -2,6 +2,7 @@
 
 A Telegram bot with some random features. https://t.me/smallBug_bot
 
+If you add the bot to a group without that group being in the DB, the bot will leave the group
 
 ## Usage
 
@@ -21,7 +22,8 @@ A Telegram bot with some random features. https://t.me/smallBug_bot
 #### Random features
 1. /boot : Use when really angry at someone. Doesn't actually kick.
 2. /pun : Sends a random pun from a predefined list of puns.
-
+3. Hey, bot : Bot will reply Yes? to an admin
+   Spam <x> as a reply to that, bot will send X messages in the group
 
 #### Group request management:
 
