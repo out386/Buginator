@@ -61,7 +61,9 @@ bot.onText(/^\/restart$|^\/restart@smallBug_bot$/, (msg) => {
           'Authorization': 'Bearer ' + process.env.API_TOKEN_HEROKU
         }
       }, (err, resp, body) => {
-        if (!err && resp && resp.statusCode === 202)
+        if (err) {
+          console.log("Restart error" + err);
+        } else if (resp && resp.statusCode === 202)
           bot.sendMessage(msg.chat.id, "Restarting the bot");
       }
     );
