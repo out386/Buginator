@@ -2,18 +2,17 @@ var token = process.env.TOKEN;
 
 var Bot = require('node-telegram-bot-api');
 var bot;
-var google = require('google');
 const translate = require('google-translate-api');
+var request = require('request');
+const crypto = require('crypto')
+const search = require('./search');
 const pool = require('./db');
 const fs = require('fs');
 var replies = require('./replies.js');
-var request = require('request');
 var tools = require('./tools');
 if (process.env.DATABASE_URL) {
   var tagAlert = require('./tag');
 }
-
-google.resultsPerPage = 10;
 
 if (process.env.NODE_ENV === 'production') {
   bot = new Bot(token);
@@ -526,25 +525,17 @@ bot.onText(/^\/allTags$/i, msg => {
 bot.onText(/^\/google (.+)/, function (msg) {
   var message = msg.text.slice(msg.text.indexOf(' ') + 1);
 
-  google(message, function (err, res) {
+  search.search(message, (err, res) => {
     if (err) {
-      if (err.message.indexOf('Error on response (503)') > -1) {
-        bot.sendMessage(msg.chat.id, 'The search was blocked by Google');
-      } else {
-        console.error(err);
-        bot.sendMessage(msg.chat.id, 'Unexpected error.');
-      }
+      console.error(err);
+      bot.sendMessage(msg.chat.id, 'An error occurred.');
     } else {
-      var link = res.links[0];
-      var title = link.title;
-      var url = link.href;
-
-      if (url == null) {
-        if (res.next) {
-          res.next();
-        }
+      if (res) {
+        var title = res[0].title;
+        var link = res[0].link;
+        bot.sendMessage(msg.chat.id, `${title}\n\n${link}`);
       } else {
-        bot.sendMessage(msg.chat.id, title + '\n\n' + url);
+        bot.sendMessage(msg.chat.id, 'No results');
       }
     }
   });
@@ -552,43 +543,38 @@ bot.onText(/^\/google (.+)/, function (msg) {
 
 function performInlineGoogle (message, id) {
   message = message.replace(/g /, '');
-  google(message, function (err, res) {
+  search.search(message, function (err, res) {
     if (err) {
-      if (err.indexOf('Error on response (503)') > -1) {
-        sendErrorReplyInline('This search was blocked by Google', id);
-        return;
-      } else {
-        sendErrorReplyInline('An error occurred', id);
-        console.error(err);
-        return;
-      }
+      console.error(err);
+      sendErrorReplyInline('An error occurred.', id);
+      return;
     }
-    var results = [];
-    for (var i = 0; i < res.links.length; ++i) {
-      var link = res.links[i];
-      var title = link.title;
-      var url = link.href;
-      if (url != null) {
-        var spliturl = url.split('/');
-        var thumbUrl = spliturl[0] + '//' + spliturl[2] + '/favicon.ico';
+    if (!res) {
+      sendErrorReplyInline('No results.', id);
+      return;
+    }
 
-        var result = {
-          'type': 'article',
-          'id': i + '',
-          'title': title,
-          'input_message_content':
-          {
-            'message_text': '<code>Google: Result for</code>   <b>"' + message + '" :</b>\n\n' + url,
-            'parse_mode': 'HTML'
-          },
-          'thumb_url': thumbUrl,
-          'hide_url': true,
-          'description': link.description
-        };
-        results.push(result);
-        bot.answerInlineQuery(id, results);
-      }
+    var results = [];
+    for (var i = 0; i < res.length; i++) {
+      var item = res[i];
+      var spliturl = item['link'].split('/');
+      var thumbUrl = `${spliturl[0]}//${spliturl[2]}/favicon.ico`;
+      var resId = crypto.createHash('sha256').update(item['link']).digest('hex').substr(0, 16);
+      var result = {
+        'type': 'article',
+        'id': resId + '',
+        'title': item['title'],
+        'input_message_content':
+        {
+          'message_text': `<code>Google: Result for</code>   <b>${message}:</b>\n\n${item['link']}`,
+          'parse_mode': 'HTML'
+        },
+        'thumb_url': thumbUrl,
+        'description': item['snippet']
+      };
+      results.push(result);
     }
+    bot.answerInlineQuery(id, results, {cache_time: 1});
   });
 }
 
