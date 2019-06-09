@@ -557,8 +557,6 @@ function performInlineGoogle (message, id) {
     var results = [];
     for (var i = 0; i < res.length; i++) {
       var item = res[i];
-      var spliturl = item['link'].split('/');
-      var thumbUrl = `${spliturl[0]}//${spliturl[2]}/favicon.ico`;
       var resId = crypto.createHash('sha256').update(item['link']).digest('hex').substr(0, 16);
       var result = {
         'type': 'article',
@@ -569,7 +567,7 @@ function performInlineGoogle (message, id) {
           'message_text': `<code>Google: Result for</code>   <b>${message}:</b>\n\n${item['link']}`,
           'parse_mode': 'HTML'
         },
-        'thumb_url': thumbUrl,
+        'thumb_url': item['thumbnail'],
         'description': item['snippet']
       };
       results.push(result);
@@ -703,13 +701,13 @@ function sendErrorReplyInline (message, id) {
     'title': 'Invalid query',
     'input_message_content':
       {
-        'message_text': 'Invalid query.'
+        'message_text': message
       },
     'hide_url': true,
     'description': message
   };
   results.push(result);
-  bot.answerInlineQuery(id, results);
+  bot.answerInlineQuery(id, results, {cache_time: 1});
 }
 
 function sendHelpInline (id) {
