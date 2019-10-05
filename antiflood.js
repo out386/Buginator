@@ -1,5 +1,5 @@
 //   Author: Antonio Pitasi (@Zaphodias)
-function AntiFlood() {
+const AntiFlood = () => {
     this.users = {}
 
     this.isFlooding = userId => {

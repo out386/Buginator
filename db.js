@@ -13,7 +13,7 @@ if (process.env.DATABASE_URL) {
     }
 
     const pool = new pg.Pool(config)
-    module.exports.query = function(text, values, callback) {
+    module.exports.query = (text, values, callback) => {
         return pool.query(text, values, callback)
     }
 }

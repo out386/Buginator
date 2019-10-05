@@ -27,7 +27,7 @@ bot.onText(/^Hey, bot$/, msg => {
     bot.sendMessage(msg.chat.id, replies.bot_ready_reply)
 })
 
-bot.onText(/^spam (\d)+$/i, function(msg) {
+bot.onText(/^spam (\d)+$/i, msg => {
     if (
         !msg.reply_to_message ||
         msg.reply_to_message.from.id != process.env.BOT_ID ||
@@ -37,7 +37,7 @@ bot.onText(/^spam (\d)+$/i, function(msg) {
         return
     }
     var status = bot.getChatMember(msg.chat.id, msg.from.id)
-    status.then(function(result) {
+    status.then(result => {
         if (result.status === 'creator' || result.status === 'administrator' || msg.from.id == process.env.OWNER) {
             var times = msg.text.replace(/^\D+/g, '')
             if (times > 20) {
@@ -72,7 +72,7 @@ bot.onText(/^\/restart$|^\/restart@smallBug_bot$/, msg => {
     }
 })
 
-bot.onText(/^flood pm([a-zA-Z\s]?)+ (\d)+$/i, function(msg) {
+bot.onText(/^flood pm([a-zA-Z\s]?)+ (\d)+$/i, msg => {
     if (msg.from.id == process.env.OWNER && msg.reply_to_message) {
         var message
         var lastSpace = msg.text.lastIndexOf(' ')
@@ -92,7 +92,7 @@ bot.onText(/^flood pm([a-zA-Z\s]?)+ (\d)+$/i, function(msg) {
     }
 })
 
-async function spam(id, times, string, originalMessage) {
+const spam = async (id, times, string, originalMessage) => {
     var delay = 1500
     const APPEND_TEXT = '\nMessage number: '
     for (var i = 1; i <= times; i++) {
@@ -101,8 +101,8 @@ async function spam(id, times, string, originalMessage) {
     }
 }
 
-bot.onText(/^\/pun$/i, function(msg) {
-    fs.readFile('./puns.txt', function(err, data) {
+bot.onText(/^\/pun$/i, msg => {
+    fs.readFile('./puns.txt', (err, data) => {
         if (err) {
             return
         }
@@ -150,7 +150,7 @@ bot.onText(/^\/boot$/, msg => {
     }
 })
 
-function generateKickReply(from, body) {
+const generateKickReply = (from, body) => {
     body = body.split('\n')[0]
     var reply = '`' + replies.kick1
     reply = reply + from
@@ -188,7 +188,7 @@ bot.onText(/^\/deletemsg$/, msg => {
         deleteMessageCommand(msg)
     } else {
         var status = bot.getChatMember(msg.chat.id, msg.from.id)
-        status.then(function(result) {
+        status.then(result => {
             if ((result.status === 'creator' || result.status === 'administrator') && msg.reply_to_message) {
                 deleteMessageCommand(msg)
             }
@@ -196,7 +196,7 @@ bot.onText(/^\/deletemsg$/, msg => {
     }
 })
 
-function deleteMessageCommand(msg) {
+const deleteMessageCommand = msg => {
     bot.deleteMessage(msg.reply_to_message.message_id, msg.chat.id)
     bot.deleteMessage(msg.message_id, msg.chat.id)
 }
@@ -228,7 +228,7 @@ bot.onText(/^s\/(.+)/i, msg => {
     bot.sendMessage(msg.chat.id, newText, { reply_to_message_id: msg.reply_to_message.message_id })
 })
 
-function findMessageIndex(msg, index) {
+const findMessageIndex = (msg, index) => {
     while (true) {
         if (index >= msg.length) {
             break
@@ -243,7 +243,7 @@ function findMessageIndex(msg, index) {
     return -1
 }
 
-bot.onText(/^\/newReq (.+)/i, function(msg) {
+bot.onText(/^\/newReq (.+)/i, msg => {
     if (!process.env.DATABASE_URL) {
         return
     }
@@ -272,7 +272,7 @@ bot.onText(/^\/newReq (.+)/i, function(msg) {
         from +
         "')"
 
-    pool.query(query, function(err, result) {
+    pool.query(query, (err, result) => {
         if (!err) {
             bot.sendMessage(msg.chat.id, '"' + req + '" was added.', { reply_to_message_id: msg.message_id }).then(
                 m => {
@@ -284,14 +284,14 @@ bot.onText(/^\/newReq (.+)/i, function(msg) {
     })
 })
 
-bot.onText(/^\/delReq (\d+)/i, function(msg) {
+bot.onText(/^\/delReq (\d+)/i, msg => {
     if (!process.env.DATABASE_URL) {
         return
     }
     var id = Number(msg.text.slice(msg.text.indexOf(' ')))
     if (id) {
         var query = 'SELECT * FROM requests WHERE chat_id = ' + msg.chat.id + ' AND id = ' + id
-        pool.query(query, function(err, result) {
+        pool.query(query, (err, result) => {
             if (err) {
                 bot.sendMessage(msg.chat.id, 'Could not delete.', { reply_to_message_id: msg.message_id })
                 return
@@ -304,12 +304,12 @@ bot.onText(/^\/delReq (\d+)/i, function(msg) {
                 } else {
                     var status = bot.getChatMember(msg.chat.id, msg.from.id)
                     status.then(
-                        function(result) {
+                        result => {
                             if (result.status === 'creator' || result.status === 'administrator') {
                                 deleteReq(id, msg, req)
                             }
                         },
-                        function(err) {
+                        err => {
                             bot.sendMessage(msg.chat.id, 'Could not delete.', { reply_to_message_id: msg.message_id })
                             console.log('getchatmemberbroke' + err)
                         },
@@ -320,12 +320,12 @@ bot.onText(/^\/delReq (\d+)/i, function(msg) {
     }
 })
 
-function deleteReq(id, msg, req) {
+const deleteReq = (id, msg, req) => {
     if (!process.env.DATABASE_URL) {
         return
     }
     var deleteQuery = 'DELETE FROM requests WHERE id = ' + id + 'AND chat_id = ' + msg.chat.id
-    pool.query(deleteQuery, function(err, result) {
+    pool.query(deleteQuery, (err, result) => {
         if (!err) {
             bot.sendMessage(msg.chat.id, '#' + id + ', "' + req + '", was deleted. ', {
                 reply_to_message_id: msg.message_id,
@@ -337,7 +337,7 @@ function deleteReq(id, msg, req) {
     })
 }
 
-bot.onText(/^\/allReqs/i, function(msg) {
+bot.onText(/^\/allReqs/i, msg => {
     if (!process.env.DATABASE_URL) {
         return
     }
@@ -458,7 +458,7 @@ bot.onText(/^\/delTag (.+)/i, msg => {
     )
 })
 
-function replyToTag(msg) {
+const replyToTag = msg => {
     if (!process.env.DATABASE_URL) {
         return
     }
@@ -531,7 +531,7 @@ bot.onText(/^\/allTags$/i, msg => {
     })
 })
 
-bot.onText(/^\/google (.+)/, function(msg) {
+bot.onText(/^\/google (.+)/, msg => {
     var message = msg.text.slice(msg.text.indexOf(' ') + 1)
 
     search.search(message, (err, res) => {
@@ -550,9 +550,9 @@ bot.onText(/^\/google (.+)/, function(msg) {
     })
 })
 
-function performInlineGoogle(message, id) {
+const performInlineGoogle = (message, id) => {
     message = message.replace(/g /, '')
-    search.search(message, function(err, res) {
+    search.search(message, (err, res) => {
         if (err) {
             console.error(err)
             sendErrorReplyInline('An error occurred.', id)
@@ -588,7 +588,7 @@ function performInlineGoogle(message, id) {
     })
 }
 
-function performInlineTranslate(message, id) {
+const performInlineTranslate = (message, id) => {
     message = message.replace(/t /, '')
     translate(message, { to: 'en' })
         .then(res => {
@@ -612,7 +612,7 @@ function performInlineTranslate(message, id) {
         })
 }
 
-bot.on('inline_query', function(msg) {
+bot.on('inline_query', msg => {
     var message = msg.query
 
     if (message) {
@@ -673,13 +673,13 @@ bot.on('message', msg => {
     }
 })
 
-bot.deleteMessage = function(messageId, chatId, form = {}) {
+bot.deleteMessage = (messageId, chatId, form = {}) => {
     form.chat_id = chatId
     form.message_id = messageId
     return this._request('deleteMessage', { form })
 }
 
-async function leaveCheck(msg) {
+const leaveCheck = async msg => {
     if (msg.new_chat_member.id == process.env.BOT_ID) {
         await tools.sleep(20000) // Waiting for owner to send the add group command
         var query = "SELECT chat_id FROM authorized_chats WHERE chat_id='" + msg.chat.id + "'"
@@ -693,7 +693,7 @@ async function leaveCheck(msg) {
     }
 }
 
-function sendGroupLeftToOwner(msg) {
+const sendGroupLeftToOwner = msg => {
     var leftGroupName
     if (msg.chat.title) {
         leftGroupName = msg.chat.title
@@ -703,7 +703,7 @@ function sendGroupLeftToOwner(msg) {
     bot.sendMessage(process.env.OWNER, 'Just left ' + leftGroupName)
 }
 
-function sendErrorReplyInline(message, id) {
+const sendErrorReplyInline = (message, id) => {
     var results = []
     var result = {
         type: 'article',
@@ -719,7 +719,7 @@ function sendErrorReplyInline(message, id) {
     bot.answerInlineQuery(id, results, { cache_time: 1 })
 }
 
-function sendHelpInline(id) {
+const sendHelpInline = id => {
     var results = []
     var result = {
         type: 'article',
