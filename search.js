@@ -4,7 +4,7 @@ const KEY = process.env.GOOGLE_KEY
 
 const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${KEY}&cx=${CX}&num=10&fields=items(link%2Csnippet%2Ctitle%2Cpagemap%2Fcse_thumbnail%2Fsrc)&q=`
 
-function search(query, callback) {
+const search = (query, callback) => {
     request.get(searchUrl + query, { json: true }, (err, resp, body) => {
         if (err) {
             console.print(err)
@@ -31,4 +31,6 @@ function search(query, callback) {
     })
 }
 
-module.exports.search = search
+module.exports = {
+    search,
+}

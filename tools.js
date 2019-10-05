@@ -1,10 +1,10 @@
-async function deleteMsg(bot, msg, time) {
+deleteMsg = async (bot, msg, time) => {
     await sleep(time)
     bot.deleteMessage(msg.message_id, msg.chat.id).catch(ignored => {})
 }
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms))
-}
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
-module.exports.deleteMsg = deleteMsg
-module.exports.sleep = sleep
+module.exports = {
+    deleteMsg,
+    sleep,
+}

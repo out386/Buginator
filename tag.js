@@ -11,7 +11,7 @@ var util = require('util')
 var tools = require('./tools')
 var af = new AntiFlood()
 
-function addUser(username, userId, chatId) {
+const addUser = (username, userId, chatId) => {
     if (!username || !userId) {
         return
     }
@@ -33,7 +33,7 @@ function addUser(username, userId, chatId) {
     })
 }
 
-function notifyUser(bot, user, msg, silent) {
+const notifyUser = (bot, user, msg, silent) => {
     if (user.substring) {
         // user is a string -> get id from db
         var query = "SELECT id FROM users WHERE username='" + user.toLowerCase() + "'"
@@ -48,7 +48,7 @@ function notifyUser(bot, user, msg, silent) {
     }
 }
 
-function notify(bot, msg, userId, silent) {
+const notify = (bot, msg, userId, silent) => {
     bot.getChatMember(msg.chat.id, userId).then(res => {
         if (res.status === 'left' || res.status === 'kicked') {
             return
@@ -84,7 +84,7 @@ function notify(bot, msg, userId, silent) {
     })
 }
 
-function onCallback(bot, call) {
+const onCallback = (bot, call) => {
     if (!af.isFlooding(call.from.id)) {
         var splitted = call.data.split('_')
         if (splitted[0] === '/retrieve') {
@@ -107,7 +107,7 @@ function onCallback(bot, call) {
     }
 }
 
-function onStart(bot, msg) {
+const onStart = (bot, msg) => {
     if (msg.chat.type !== 'private') {
         return
     }
@@ -117,7 +117,7 @@ function onStart(bot, msg) {
     }
 }
 
-function onInfo(bot, msg) {
+const onInfo = (bot, msg) => {
     if (!af.isFlooding(msg.from.id)) {
         if (msg.chat.type !== 'private') {
             bot.sendMessage(msg.chat.id, replies.start_group)
@@ -127,7 +127,7 @@ function onInfo(bot, msg) {
     }
 }
 
-function onMessage(bot, msg) {
+const onMessage = (bot, msg) => {
     addUser(msg.from.username, msg.from.id, msg.chat.id)
 
     if (
@@ -184,7 +184,9 @@ function onMessage(bot, msg) {
     })
 }
 
-module.exports.onMessage = onMessage
-module.exports.onCallback = onCallback
-module.exports.onInfo = onInfo
-module.exports.onStart = onStart
+module.exports = {
+    onMessage,
+    onCallback,
+    onInfo,
+    onStart,
+}
