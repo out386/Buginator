@@ -1,6 +1,6 @@
 # Buginator
 
-A Telegram bot with some random features. https://t.me/smallBug_bot
+A Telegram bot with some random and useful features. https://t.me/smallBug_bot
 
 
 ## Usage
