@@ -9,6 +9,7 @@ const pool = require('./db');
 const fs = require('fs');
 var replies = require('./replies.js');
 var tools = require('./tools');
+var prices = require('./prices');
 
 if (process.env.NODE_ENV === 'production') {
   bot = new Bot(token);
@@ -16,6 +17,7 @@ if (process.env.NODE_ENV === 'production') {
 } else {
   bot = new Bot(token, { polling: true });
 }
+prices = new prices.Prices(bot, pool);
 
 console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
 
@@ -272,6 +274,9 @@ bot.onText(/^\/newReq (.+)/i, function (msg) {
     }
   });
 });
+
+setInterval(() => prices.updatePrices(), 3000);
+prices.updatePrices();
 
 bot.onText(/^\/delReq (\d+)/i, function (msg) {
   if (!process.env.DATABASE_URL) {
