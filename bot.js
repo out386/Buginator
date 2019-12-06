@@ -2,7 +2,6 @@ var token = process.env.TOKEN;
 
 var Bot = require('node-telegram-bot-api');
 var bot;
-const translate = require('google-translate-api');
 var request = require('request');
 const crypto = require('crypto')
 const search = require('./search');
@@ -576,30 +575,6 @@ function performInlineGoogle (message, id) {
   });
 }
 
-function performInlineTranslate (message, id) {
-  message = message.replace(/t /, '');
-  translate(message, { to: 'en' })
-    .then(res => {
-      var result = {
-        'type': 'article',
-        'id': '1',
-        'title': 'Translated to English',
-        'input_message_content':
-        {
-          'message_text': '<b>' + message + '</b>' + '<code> translated to English:</code>\n' + res.text,
-          'parse_mode': 'HTML'
-        },
-        'description': res.text
-      };
-      var results = [];
-      results.push(result);
-      bot.answerInlineQuery(id, results);
-    })
-    .catch(err => {
-      sendErrorReplyInline('An error occurred. Our code monkeys are NOT trying to fix your problem.', id);
-      console.error(err);
-    });
-}
 
 bot.on('inline_query', function (msg) {
   var message = msg.query;
@@ -607,8 +582,6 @@ bot.on('inline_query', function (msg) {
   if (message) {
     if (/g (.+)/.test(message)) {
       performInlineGoogle(message, msg.id);
-    } else if (/t (.+)/.test(message)) {
-      performInlineTranslate(message, msg.id);
     } else {
       sendErrorReplyInline('Invalid command! Check the list of available commands.', msg.id);
     }
@@ -723,19 +696,6 @@ function sendHelpInline (id) {
     'thumb_url': 'https://google.com/favicon.ico',
     'hide_url': true,
     'description': 'Search for anything with Google Search\nTap "g" (without quotes) now to use.'
-  };
-  results.push(result);
-
-  result = {
-    'type': 'article',
-    'id': 'Translaten',
-    'title': 'Translate to english',
-    'input_message_content':
-      {
-        'message_text': 'Type @BigBug_bot t (text) to translate to english'
-      },
-    'hide_url': true,
-    'description': 'Translate anything with Google Translate\nTap "t" (without quotes) now to use.'
   };
   results.push(result);
   bot.answerInlineQuery(id, results);

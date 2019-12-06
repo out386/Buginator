@@ -15,7 +15,6 @@
     "alasql": "^0.3.9",
     "body-parser": "^1.15.0",
     "express": "^4.13.4",
-    "google-translate-api": "^2.2.2",
     "node-telegram-bot-api": "^0.27.0",
     "pg": "6.x",
     "request": "^2.88.0"

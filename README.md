@@ -5,10 +5,9 @@ A Telegram bot with some random features. https://t.me/smallBug_bot
 
 ## Usage
 
-#### Inline functions:
+#### Inline function:
 
-1. @smallBug_bot g (query) : Perform an inline/interactive Google Search.
-2. @smallBug_bot t (text) : Translate text to english.
+@smallBug_bot g (query) : Perform an inline/interactive Google Search.
 
 
 #### Group tag management:
