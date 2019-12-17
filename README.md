@@ -30,10 +30,7 @@ _Stores the provided message in a list._
 3. /delreq requestNumber : Delete the specified request (bot owner, group admin, and original requester only). There's no validation before confirmation, so things like "/deltag The biggest idiot" will produce interesting results.
 
 
-#### TagAlert:
-
-This bot also contains a copy of [TagAlertBot](https://github.com/Pitasi/TagAlertBot).  
-This bot needs the "privacy" attribute to be set to "disabled" and the inline attribute to be set to "enabled" from Botfather.
+The "privacy" attribute should be set to "disabled" and the inline attribute should be set to "enabled" from Botfather.
 
 This bot was written using [heroku-node-telegram-bot](https://github.com/volodymyrlut/heroku-node-telegram-bot). The below are the hosting instructions from heroku-node-telegram-bot, modified for Buginator.
 
@@ -85,5 +82,4 @@ To go back to development mode, run `npm run switch_to_dev`. This script will di
 
 The puns were copied from [here](https://www.bungie.net/en/Forums/Post/134567540?page=0&path=1).  
 The /boot messages get generated with [this](https://github.com/ngerakines/commitment), from [here](http://whatthecommit.com/index.txt).  
-This bot was written using [heroku-node-telegram-bot](https://github.com/volodymyrlut/heroku-node-telegram-bot).  
-It contains a copy of [TagAlertBot](https://github.com/Pitasi/TagAlertBot).  
+This bot was written using [heroku-node-telegram-bot](https://github.com/volodymyrlut/heroku-node-telegram-bot). 
