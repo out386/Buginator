@@ -31,7 +31,7 @@ class Prices {
 
   chatIndexOf(chatRows, item) {
     for (var i = 0; i < chatRows.length; i++)
-      if(item.chat_id === chatRows[i].chat_id)
+      if (item.chat_id === chatRows[i].chat_id)
         return i;
   }
 
@@ -90,7 +90,7 @@ class Prices {
           const $ = cheerio.load(result.data);
           var price = $('#container > * > .t-0M7P > ._3e7xtJ > ._1HmYoV > .col-8-12 > .col-12-12 > ._29OxBi > ._3iZgFn > ._2i1QSc > ._1uv9Cb > ._1vC4OE').text();
           var title = $('#container > * > .t-0M7P > ._3e7xtJ > ._1HmYoV > .col-8-12 > .col-12-12 > ._29OxBi > * > ._9E25nV > ._35KyD6').text();
-          title = title.substring(0, 100) + '...';
+          title = title.length > 70 ? title.substring(0, 70) + '...' : title;
           if (!price || price === '' || price === ' ') {
             // Should probably reject at this point
             price = '-1';
@@ -107,7 +107,7 @@ class Prices {
             priceChanged = true;
           else
             priceChanged = false;
-          
+
           resolve({
             url: url,
             priceChanged: priceChanged,
@@ -149,17 +149,57 @@ class Prices {
     var query = `UPDATE prices SET price=${newPrice} WHERE url='${url}'`;
     this.pool.query(query, function (err) {
       if (err) {
-        console.log(`Error while updating price of ${url}: ${err.message}`);
+        console.log(`Prices: Error while updating price of ${url}: ${err.message}`);
       }
     });
   }
 
-  updateMessage(chatId, newMsgId) {
+  updateMessage(chatId, newMsgId, callback) {
     var query = `UPDATE prices SET msg_id=${newMsgId} WHERE chat_id='${chatId}'`;
     this.pool.query(query, function (err) {
       if (err) {
-        console.log(`Error while updating message IDs for ${chatId}: ${err.message}`);
+        console.log(`Prices: Error while updating message IDs for ${chatId}: ${err.message}`);
+        if (callback) {
+          callback(err);
+        }
+      } else {
+        if (callback) {
+          callback();
+        }
       }
+    });
+  }
+
+  addItem(url, chatId) {
+    const func = this;
+    var insertQuery = `INSERT INTO prices (url, price, msg_id, chat_id) VALUES ('${url}', -1, -1, '${chatId}')`;
+    func.pool.query(insertQuery, function (err) {
+      if (err) {
+        console.log(`Prices: Error while adding ${url} for ${chatId}: ${err.message}`);
+        return;
+      }
+      // Will force a new message
+      // TODO: Delete the old message
+      func.updateMessage(chatId, -1, err => {
+        func.updatePrices();
+      });
+    });
+  }
+
+  removeItem(url, chatId) {
+    // TODO: stop the timer when there aren't any items being watched
+    const func = this;
+    var deleteQuery = `DELETE FROM prices WHERE chat_id='${chatId}' AND url='${url}'`
+    func.pool.query(deleteQuery, function (err) {
+      if (err) {
+        console.log(`Prices: Error while deleting ${url} for ${chatId}: ${err.message}`);
+        return;
+      }
+      // Will force a new message
+      // TODO: Delete the old message
+      func.updateMessage(chatId, -1, err => {
+        func.updatePrices();
+      });
     });
   }
 

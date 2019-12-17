@@ -275,8 +275,24 @@ bot.onText(/^\/newReq (.+)/i, function (msg) {
   });
 });
 
-setInterval(() => prices.updatePrices(), 3000);
+// TODO: Check if there are any items in the DB first
+setInterval(() => prices.updatePrices(), 45 * 60000);
 prices.updatePrices();
+
+bot.onText(/^\/addPrice (.+)/i, function (msg, match) {
+  if (!process.env.DATABASE_URL) {
+    return;
+  }
+  prices.addItem(match[1], msg.chat.id);
+});
+
+
+bot.onText(/^\/delPrice (.+)/i, function (msg, match) {
+  if (!process.env.DATABASE_URL) {
+    return;
+  }
+  prices.removeItem(match[1], msg.chat.id);
+});
 
 bot.onText(/^\/delReq (\d+)/i, function (msg) {
   if (!process.env.DATABASE_URL) {
