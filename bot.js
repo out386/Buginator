@@ -27,13 +27,13 @@ bot.onText(/^Hey, bot$/, (msg) => {
 
 bot.onText(/^spam (\d)+$/i, function (msg) {
   if (!msg.reply_to_message || msg.reply_to_message.from.id != process.env.BOT_ID ||
-       !msg.reply_to_message.text || msg.reply_to_message.text !== replies.bot_ready_reply) {
+    !msg.reply_to_message.text || msg.reply_to_message.text !== replies.bot_ready_reply) {
     return;
   }
   var status = bot.getChatMember(msg.chat.id, msg.from.id);
   status.then(function (result) {
     if (result.status === 'creator' || result.status === 'administrator' ||
-        msg.from.id == process.env.OWNER) {
+      msg.from.id == process.env.OWNER) {
       var times = msg.text.replace(/^\D+/g, '');
       if (times > 20) {
         bot.sendMessage(msg.chat.id, "I can't count that high, now FO");
@@ -85,7 +85,7 @@ bot.onText(/^flood pm([a-zA-Z\s]?)+ (\d)+$/i, function (msg) {
   } else { bot.sendMessage(msg.chat.id, 'Uh... No.'); }
 });
 
-async function spam (id, times, string, originalMessage) {
+async function spam(id, times, string, originalMessage) {
   var delay = 1500;
   const APPEND_TEXT = '\nMessage number: ';
   for (var i = 1; i <= times; i++) {
@@ -110,7 +110,7 @@ bot.onText(/^\/boot$/, (msg) => {
     var from;
 
     if (msg.reply_to_message.from.id == process.env.OWNER ||
-        msg.reply_to_message.from.id == process.env.BOT_ID) {
+      msg.reply_to_message.from.id == process.env.BOT_ID) {
       var reply;
       if (msg.from.id == process.env.OWNER) {
         reply = replies.owner_wrong_kick;
@@ -147,7 +147,7 @@ bot.onText(/^\/boot$/, (msg) => {
   }
 });
 
-function generateKickReply (from, body) {
+function generateKickReply(from, body) {
   body = body.split('\n')[0];
   var reply = '`' + replies.kick1;
   reply = reply + from;
@@ -187,14 +187,14 @@ bot.onText(/^\/deletemsg$/, (msg) => {
     var status = bot.getChatMember(msg.chat.id, msg.from.id);
     status.then(function (result) {
       if ((result.status === 'creator' || result.status === 'administrator') &&
-          msg.reply_to_message) {
+        msg.reply_to_message) {
         deleteMessageCommand(msg);
       }
     });
   }
 });
 
-function deleteMessageCommand (msg) {
+function deleteMessageCommand(msg) {
   bot.deleteMessage(msg.reply_to_message.message_id, msg.chat.id);
   bot.deleteMessage(msg.message_id, msg.chat.id);
 }
@@ -221,10 +221,10 @@ bot.onText(/^s\/(.+)/i, (msg) => {
     return;
   }
   var newText = msg.reply_to_message.text.replace(regexp, replaceText);
-  bot.sendMessage(msg.chat.id, newText, {reply_to_message_id: msg.reply_to_message.message_id});
+  bot.sendMessage(msg.chat.id, newText, { reply_to_message_id: msg.reply_to_message.message_id });
 });
 
-function findMessageIndex (msg, index) {
+function findMessageIndex(msg, index) {
   while (true) {
     if (index >= msg.length) {
       break;
@@ -266,7 +266,7 @@ bot.onText(/^\/newReq (.+)/i, function (msg) {
 
   pool.query(query, function (err, result) {
     if (!err) {
-      bot.sendMessage(msg.chat.id, '"' + req + '" was added.', {reply_to_message_id: msg.message_id})
+      bot.sendMessage(msg.chat.id, '"' + req + '" was added.', { reply_to_message_id: msg.message_id })
         .then((m) => {
           tools.deleteMsg(bot, m, 15000);
         });
@@ -303,7 +303,7 @@ bot.onText(/^\/delReq (\d+)/i, function (msg) {
     var query = 'SELECT * FROM requests WHERE chat_id = ' + msg.chat.id + ' AND id = ' + id;
     pool.query(query, function (err, result) {
       if (err) {
-        bot.sendMessage(msg.chat.id, 'Could not delete.', {reply_to_message_id: msg.message_id});
+        bot.sendMessage(msg.chat.id, 'Could not delete.', { reply_to_message_id: msg.message_id });
         return;
       }
       if (result && result.rows && result.rows[0]) {
@@ -318,7 +318,7 @@ bot.onText(/^\/delReq (\d+)/i, function (msg) {
               deleteReq(id, msg, req);
             }
           }, function (err) {
-            bot.sendMessage(msg.chat.id, 'Could not delete.', {reply_to_message_id: msg.message_id});
+            bot.sendMessage(msg.chat.id, 'Could not delete.', { reply_to_message_id: msg.message_id });
             console.log('getchatmemberbroke' + err);
           });
         }
@@ -327,7 +327,7 @@ bot.onText(/^\/delReq (\d+)/i, function (msg) {
   }
 });
 
-function deleteReq (id, msg, req) {
+function deleteReq(id, msg, req) {
   if (!process.env.DATABASE_URL) {
     return;
   }
@@ -403,12 +403,12 @@ bot.onText(/^(\/newTag (.+))/i, msg => {
       text = text + ' ';
       message = text.slice(tagEndIndex + 1);
       var query = "INSERT INTO tags (id, tag, message) VALUES ('" + msg.chat.id +
-          "','" + tag.toLowerCase() +
-          "','" + message + "')" +
-          "ON CONFLICT ON CONSTRAINT uk DO UPDATE SET id='" +
-          msg.chat.id + "', tag='" +
-          tag.toLowerCase() + "', message='" +
-          message + "'";
+        "','" + tag.toLowerCase() +
+        "','" + message + "')" +
+        "ON CONFLICT ON CONSTRAINT uk DO UPDATE SET id='" +
+        msg.chat.id + "', tag='" +
+        tag.toLowerCase() + "', message='" +
+        message + "'";
 
       pool.query(query, (err, result) => {
         if (!err) {
@@ -463,7 +463,7 @@ bot.onText(/^\/delTag (.+)/i, msg => {
     });
 });
 
-function replyToTag (msg) {
+function replyToTag(msg) {
   if (!process.env.DATABASE_URL) {
     return;
   }
@@ -475,7 +475,7 @@ function replyToTag (msg) {
     return;
   }
   var query = "SELECT message FROM tags WHERE id='" +
-                msg.chat.id + "' AND (";
+    msg.chat.id + "' AND (";
   for (var i = 0; i < tags.length - 1; i++) {
     if (tags[i]) {
       query = query + "tag='" + tags[i].toLowerCase() + "' OR ";
@@ -558,7 +558,7 @@ bot.onText(/^\/google (.+)/, function (msg) {
   });
 });
 
-function performInlineGoogle (message, id) {
+function performInlineGoogle(message, id) {
   message = message.replace(/g /, '');
   search.search(message, function (err, res) {
     if (err) {
@@ -589,7 +589,7 @@ function performInlineGoogle (message, id) {
       };
       results.push(result);
     }
-    bot.answerInlineQuery(id, results, {cache_time: 1});
+    bot.answerInlineQuery(id, results, { cache_time: 1 });
   });
 }
 
@@ -627,7 +627,7 @@ bot.onText(/!addgroup/, (msg) => {
 bot.on('message', (msg) => {
   if (process.env.DATABASE_URL) {
     if (msg.new_chat_member) {
-    // Checking if the bot got added to a chat
+      // Checking if the bot got added to a chat
       leaveCheck(msg);
     }
     replyToTag(msg);
@@ -640,14 +640,14 @@ bot.deleteMessage = function (messageId, chatId, form = {}) {
   return this._request('deleteMessage', { form });
 };
 
-async function leaveCheck (msg) {
+async function leaveCheck(msg) {
   if (msg.new_chat_member.id == process.env.BOT_ID) {
     await tools.sleep(20000); // Waiting for owner to send the add group command
     var query = "SELECT chat_id FROM authorized_chats WHERE chat_id='" + msg.chat.id + "'";
     pool.query(query, (err, result) => {
       if (err || !result || !result.rows || !result.rows[0]) {
         bot.sendMessage(msg.chat.id, replies.leaving_chat)
-          .catch(() => {});
+          .catch(() => { });
         bot.leaveChat(msg.chat.id);
         sendGroupLeftToOwner(msg);
       }
@@ -655,7 +655,7 @@ async function leaveCheck (msg) {
   }
 }
 
-function sendGroupLeftToOwner (msg) {
+function sendGroupLeftToOwner(msg) {
   var leftGroupName;
   if (msg.chat.title) {
     leftGroupName = msg.chat.title;
@@ -665,33 +665,33 @@ function sendGroupLeftToOwner (msg) {
   bot.sendMessage(process.env.OWNER, 'Just left ' + leftGroupName);
 }
 
-function sendErrorReplyInline (message, id) {
+function sendErrorReplyInline(message, id) {
   var results = [];
   var result = {
     'type': 'article',
     'id': 'oops',
     'title': 'Invalid query',
     'input_message_content':
-      {
-        'message_text': message
-      },
+    {
+      'message_text': message
+    },
     'hide_url': true,
     'description': message
   };
   results.push(result);
-  bot.answerInlineQuery(id, results, {cache_time: 1});
+  bot.answerInlineQuery(id, results, { cache_time: 1 });
 }
 
-function sendHelpInline (id) {
+function sendHelpInline(id) {
   var results = [];
   var result = {
     'type': 'article',
     'id': 'Googlen',
     'title': 'Google',
     'input_message_content':
-      {
-        'message_text': 'Type @BigBug_bot g (query) to search with Google'
-      },
+    {
+      'message_text': 'Type @BigBug_bot g (query) to search with Google'
+    },
     'thumb_url': 'https://google.com/favicon.ico',
     'hide_url': true,
     'description': 'Search for anything with Google Search\nTap "g" (without quotes) now to use.'
