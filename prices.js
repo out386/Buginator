@@ -88,15 +88,25 @@ class Prices {
       axios.get(url)
         .then(result => {
           const $ = cheerio.load(result.data);
-          var price = $('#container > * > .t-0M7P > ._3e7xtJ > ._1HmYoV > .col-8-12 > .col-12-12 > ._29OxBi > ._3iZgFn > ._2i1QSc > ._1uv9Cb > ._1vC4OE').text();
-          var title = $('#container > * > .t-0M7P > ._3e7xtJ > ._1HmYoV > .col-8-12 > .col-12-12 > ._29OxBi > * > ._9E25nV > ._35KyD6').text();
-          title = title.length > 70 ? title.substring(0, 70) + '...' : title;
+          var priceInt;
+          var price = $('#container > * > ._3Z5yZS > ._1HmYoV > .col-8-12 > .col-12-12 > ._29OxBi > ._3iZgFn > ._2i1QSc > ._1uv9Cb > ._1vC4OE').text();
+          var title = $('#container > * > ._3Z5yZS > ._1HmYoV > .col-8-12 > .col-12-12 > ._29OxBi > * > ._9E25nV > ._35KyD6').text();
+          title = (!title || title === '' || title === ' ') ? 'Title' : title.length > 70 ? title.substring(0, 70) + '...' : title;
           if (!price || price === '' || price === ' ') {
-            // Should probably reject at this point
-            price = '-1';
+            var price = $('#container > * > ._3Z5yZS > ._1HmYoV > .col-8-12 > .col-12-12 > ._29OxBi > ._1JKm3V > .qR0IkO > *')[0].children[0].data;
+            if (!price || price === '' || price === ' ') {
+              // Should probably reject at this point
+              price = '-1';
+            } else {
+              var temp = price.split(' ');
+              temp = temp[temp.length - 1];
+              priceInt = parseFloat(temp.substring(1));
+            }
           }
-          // The first char is a currency symbol
-          var priceInt = parseFloat(price.substring(1))
+          if (!priceInt) {
+            // The first char is a currency symbol
+            priceInt = parseFloat(price.substring(1));
+          }
           if (!priceInt) {
             priceInt = -1;
             price = '-1';
