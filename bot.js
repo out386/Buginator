@@ -203,6 +203,7 @@ function deleteMessageCommand(msg) {
 bot.onText(/^s\/(.+)/i, (msg) => {
   if (!msg.reply_to_message || !msg.reply_to_message.text || !msg.text) { return; }
   var message = msg.text.substring(2); // As 0 and 1 are "s/"
+  var isGlobal = message.endsWith('/g') && message.charAt(message.length - 3) !== '\\';
   var regexIndex = findMessageIndex(message, 0);
   if (regexIndex === -1) {
     return;
@@ -216,7 +217,10 @@ bot.onText(/^s\/(.+)/i, (msg) => {
   replaceText = replaceText.replace(/\\/g, ''); // Yeah, can't use real backslashes in the replace string. :evil_smile:
   var regexp;
   try {
-    regexp = new RegExp(regexText, 'g');
+    if (isGlobal)
+      regexp = new RegExp(regexText, 'g');
+    else
+      regexp = new RegExp(regexText);
   } catch (e) {
     return;
   }
