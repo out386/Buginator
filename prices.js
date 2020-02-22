@@ -89,8 +89,8 @@ class Prices {
         .then(result => {
           const $ = cheerio.load(result.data);
           var priceInt;
-          var price = $('#container > * > ._3Z5yZS > ._1HmYoV > .col-8-12 > .col-12-12 > ._29OxBi > ._3iZgFn > ._2i1QSc > ._1uv9Cb > ._1vC4OE').text();
-          var title = $('#container > * > ._3Z5yZS > ._1HmYoV > .col-8-12 > .col-12-12 > ._29OxBi > * > ._9E25nV > ._35KyD6').text();
+          var price = $('#container > div > div.t-0M7P._3GgMx1._2doH3V > div._3e7xtJ > div._1HmYoV.hCUpcT > div._1HmYoV._35HD7C.col-8-12 > div:nth-child(2) > div > div._3iZgFn > div._2i1QSc > div > div._1vC4OE._3qQ9m1').text();
+          var title = $('#container > div > div.t-0M7P._3GgMx1._2doH3V > div._3e7xtJ > div._1HmYoV.hCUpcT > div._1HmYoV._35HD7C.col-8-12 > div:nth-child(2) > div > div:nth-child(1) > h1 > span').text();
           title = (!title || title === '' || title === ' ') ? 'Title' : title.length > 70 ? title.substring(0, 70) + '...' : title;
           if (!price || price === '' || price === ' ') {
             var price = $('#container > * > ._3Z5yZS > ._1HmYoV > .col-8-12 > .col-12-12 > ._29OxBi > ._1JKm3V > .qR0IkO > *')[0].children[0].data;
