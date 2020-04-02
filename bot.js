@@ -10,6 +10,7 @@ const fs = require('fs');
 var replies = require('./replies.js');
 var tools = require('./tools');
 var prices = require('./prices');
+const covid = require('./covid');
 
 if (process.env.NODE_ENV === 'production') {
   bot = new Bot(token);
@@ -290,6 +291,15 @@ bot.onText(/^\/addPrice (.+)/i, function (msg, match) {
   prices.addItem(match[1], msg.chat.id);
 });
 
+bot.onText(/^\/covid(\s.+)?$/i, function(msg, match) {
+  covid.getCovidStats(match[1] ? match[1].trim() : null, function(resp) {
+    bot.sendMessage(msg.chat.id, resp,
+      {
+        parse_mode: 'HTML'
+      })
+      .catch(() => { });
+  });
+});
 
 bot.onText(/^\/delPrice (.+)/i, function (msg, match) {
   if (!process.env.DATABASE_URL) {
