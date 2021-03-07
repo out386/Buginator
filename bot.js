@@ -281,7 +281,7 @@ bot.onText(/^\/newReq (.+)/i, function (msg) {
 });
 
 // TODO: Check if there are any items in the DB first
-setInterval(() => prices.updatePrices(), 45 * 60000);
+setInterval(() => prices.updatePrices(), 20 * 60000);
 prices.updatePrices();
 
 bot.onText(/^\/addPrice (.+)/i, function (msg, match) {

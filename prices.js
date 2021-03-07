@@ -66,7 +66,8 @@ class Prices {
             lastPromise = chain(lastPromise, item);
           }
         }
-        lastPromise.then(res => {
+        lastPromise
+        .then(res => {
           if (res.priceChanged)
             isUpdateNeeded = true;
           func.updatePrice(res.url, res.newPrice);
@@ -77,7 +78,8 @@ class Prices {
             func.sendNewMsg(chatId, result);
           else
             func.editMessage(chatId, msgId, result);
-        });
+        })
+        .catch(err => console.error(err));
       }
     });
   }
@@ -85,14 +87,33 @@ class Prices {
   fetchSinglePrice(url, lastPrice) {
     lastPrice = parseFloat(lastPrice);
     return new Promise((resolve, reject) => {
-      axios.get(url)
+      axios.get(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36' } })
         .then(result => {
           const $ = cheerio.load(result.data);
           var priceInt;
-          var price = $('#container > div > div._2c7YLP.UtUXW0._6t1WkM._3HqJxg > div._1YokD2._2GoDe3 > div._1YokD2._3Mn1Gg.col-8-12 > div:nth-child(2) > div > div.dyC4hf > div.CEmiEU > div > div._30jeq3._16Jk6d').text();
-          var title = $('#container > div > div._2c7YLP.UtUXW0._6t1WkM._3HqJxg > div._1YokD2._2GoDe3 > div._1YokD2._3Mn1Gg.col-8-12 > div:nth-child(2) > div > div:nth-child(1) > h1 > span').text();
+          var price;
+          var title;
+
+          if (url.indexOf('flipkart.com') > -1) {
+            price = $('#container > div > div._2c7YLP.UtUXW0._6t1WkM._3HqJxg > div._1YokD2._2GoDe3 > div._1YokD2._3Mn1Gg.col-8-12 > div:nth-child(2) > div > div.dyC4hf > div.CEmiEU > div > div._30jeq3._16Jk6d').text();
+            title = $('#container > div > div._2c7YLP.UtUXW0._6t1WkM._3HqJxg > div._1YokD2._2GoDe3 > div._1YokD2._3Mn1Gg.col-8-12 > div:nth-child(2) > div > div:nth-child(1) > h1 > span').text();
+          } else if (url.indexOf('amazon.in') > -1) {
+            price = $('#priceblock_ourprice').text();
+            title = $('#productTitle').text().trim();
+          } else {
+              // Yeah, I don't care to find out what happens if I reject here, so let's just resolve with garbage
+              resolve({
+                url: url,
+                priceChanged: false,
+                newPrice: -1,
+                msg: `<a href="${url}">Invalid URL</a> - ${price}`
+              })
+              return;
+          }
+          
           title = (!title || title === '' || title === ' ') ? 'Title' : title.length > 70 ? title.substring(0, 70) + '...' : title;
-          if (!price || price === '' || price === ' ') {
+          price = price.replace(',','');
+          /* if (!price || price === '' || price === ' ') {
             var price = $('#container > * > ._3Z5yZS > ._1HmYoV > .col-8-12 > .col-12-12 > ._29OxBi > ._1JKm3V > .qR0IkO > *')[0].children[0].data;
             if (!price || price === '' || price === ' ') {
               // Should probably reject at this point
@@ -102,7 +123,7 @@ class Prices {
               temp = temp[temp.length - 1];
               priceInt = parseFloat(temp.substring(1));
             }
-          }
+          } */
           if (!priceInt) {
             // The first char is a currency symbol
             priceInt = parseFloat(price.substring(1));
