@@ -26,6 +26,11 @@ bot.onText(/^Hey, bot$/, (msg) => {
   bot.sendMessage(msg.chat.id, replies.bot_ready_reply);
 });
 
+bot.onText(/^\/shrug$/, (msg) => {
+  const messageId = msg.reply_to_message ? msg.reply_to_message.message_id : msg.message_id;
+  bot.sendMessage(msg.chat.id, '¯\\_(ツ)_/¯', { reply_to_message_id: messageId });
+});
+
 bot.onText(/^spam (\d)+$/i, function (msg) {
   if (!msg.reply_to_message || msg.reply_to_message.from.id != process.env.BOT_ID ||
     !msg.reply_to_message.text || msg.reply_to_message.text !== replies.bot_ready_reply) {
@@ -697,20 +702,31 @@ function sendErrorReplyInline(message, id) {
 }
 
 function sendHelpInline(id) {
-  var results = [];
-  var result = {
-    'type': 'article',
-    'id': 'Googlen',
-    'title': 'Google',
-    'input_message_content':
+  var results = [
     {
-      'message_text': 'Type @BigBug_bot g (query) to search with Google'
+      'type': 'article',
+      'id': 'Googlen',
+      'title': 'Google',
+      'input_message_content':
+      {
+        'message_text': 'Type @theSmallTestBugBot g (query) to search with Google'
+      },
+      'thumb_url': 'https://google.com/favicon.ico',
+      'hide_url': true,
+      'description': 'Search for anything with Google Search\nTap "g" (without quotes) now to use.'
     },
-    'thumb_url': 'https://google.com/favicon.ico',
-    'hide_url': true,
-    'description': 'Search for anything with Google Search\nTap "g" (without quotes) now to use.'
-  };
-  results.push(result);
+    {
+      'type': 'article',
+      'id': 'Shrug2',
+      'title': 'Shrug',
+      'input_message_content':
+      {
+        'message_text': '¯\\_(ツ)_/¯'
+      },
+      'hide_url': true,
+      'description': '¯\\_(ツ)_/¯'
+    }
+  ];
   bot.answerInlineQuery(id, results);
 }
 
