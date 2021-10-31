@@ -99,7 +99,7 @@ class Prices {
             title = $('#container > div > div._2c7YLP.UtUXW0._6t1WkM._3HqJxg > div._1YokD2._2GoDe3 > div._1YokD2._3Mn1Gg.col-8-12 > div:nth-child(2) > div > div:nth-child(1) > h1 > span').text();
           } else if (url.indexOf('amazon.in') > -1) {
             price = $('#priceblock_ourprice').text();
-            
+            if(!price) price = $('#priceblock_dealprice').text()
             title = $('#productTitle').text().trim();
           } else {
               // Yeah, I don't care to find out what happens if I reject here, so let's just resolve with garbage
